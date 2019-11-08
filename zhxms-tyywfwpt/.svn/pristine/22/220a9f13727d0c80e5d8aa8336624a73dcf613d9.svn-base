@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>cn.com.bmsoft</groupId>
+	<artifactId>zhxms-tyywfwpt</artifactId>
+	<version>1.0.0</version>
+	<name>zhxms-tyywfwpt</name>
+	<packaging>pom</packaging>
+	<description></description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.1.3.RELEASE</version>
+	</parent>
+
+	<modules>
+		<module>common</module>
+		<module>generator</module>
+		<module>log-monitor</module>
+		<module>platform</module>
+	</modules>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<shiro.version>1.4.0</shiro.version>
+		<mybatisplus.version>3.1.2</mybatisplus.version>
+		<lombok.version>1.18.4</lombok.version>
+		<apache.httpcore.version>4.4.11</apache.httpcore.version>
+        <commons.lang.version>2.6</commons.lang.version>
+        <commons.fileupload.version>1.2.2</commons.fileupload.version>
+        <commons.io.version>2.5</commons.io.version>
+        <commons.codec.version>1.10</commons.codec.version>
+        <commons.configuration.version>1.10</commons.configuration.version>
+		<joda.time.version>2.9.9</joda.time.version>
+		<kaptcha.version>0.0.9</kaptcha.version>
+		<code.gson.version>2.8.5</code.gson.version>
+		<mysql.version>5.1.38</mysql.version>
+		<druid.version>1.1.13</druid.version>
+		<quartz.version>2.3.0</quartz.version>
+		<swagger.version>2.7.0</swagger.version>
+		<xhtmlrenderer.version>R8</xhtmlrenderer.version>
+        <itextpdf.version>5.5.12</itextpdf.version>
+		<fastjson.version>1.2.60</fastjson.version>
+		<itext.version>2.1.7</itext.version>
+		<jsch.version>0.1.54</jsch.version>
+		<gauss.version>GaussDB_100_1.0.1.B023</gauss.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>${mysql.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>druid-spring-boot-starter</artifactId>
+				<version>${druid.version}</version>
+			</dependency>
+
+			<!--引入mybatis-plus 3.1.2-->
+			<dependency>
+				<groupId>com.baomidou</groupId>
+				<artifactId>mybatis-plus-boot-starter</artifactId>
+				<version>${mybatisplus.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.baomidou</groupId>
+						<artifactId>mybatis-plus-generator</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>com.baomidou</groupId>
+				<artifactId>mybatis-plus-generator</artifactId>
+				<version>${mybatisplus.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.huawei.gauss.jdbc</groupId>
+				<artifactId>ZenithDriver</artifactId>
+				<version>${gauss.version}</version>
+			</dependency>
+
+			<!--引入shiro 1.4.0-->
+			<dependency>
+				<groupId>org.apache.shiro</groupId>
+				<artifactId>shiro-core</artifactId>
+				<version>${shiro.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.shiro</groupId>
+				<artifactId>shiro-spring</artifactId>
+				<version>${shiro.version}</version>
+			</dependency>
+
+			<!--引入quartz-->
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>${quartz.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.mchange</groupId>
+						<artifactId>c3p0</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<!--引入swagger-ui 2.7.0-->
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger2</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger-ui</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+
+			<!--引入lombok 1.18.4-->
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
+			</dependency>
+
+			<!--引入apache httpcore 4.4.11-->
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore</artifactId>
+				<version>${apache.httpcore.version}</version>
+			</dependency>
+
+            <!--引入commons-lang 2.6-->
+			<dependency>
+				<groupId>commons-lang</groupId>
+				<artifactId>commons-lang</artifactId>
+				<version>${commons.lang.version}</version>
+			</dependency>
+			<!--引入commons-fileupload 1.2.2-->
+			<dependency>
+				<groupId>commons-fileupload</groupId>
+				<artifactId>commons-fileupload</artifactId>
+				<version>${commons.fileupload.version}</version>
+			</dependency>
+			<!--引入commons-io 2.5-->
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons.io.version}</version>
+			</dependency>
+			<!--引入commons-codec 1.10-->
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>${commons.codec.version}</version>
+			</dependency>
+			<!--引入commons-configuration 1.10-->
+			<dependency>
+				<groupId>commons-configuration</groupId>
+				<artifactId>commons-configuration</artifactId>
+				<version>${commons.configuration.version}</version>
+			</dependency>
+
+			<!--引入joda-time 2.9.9-->
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time</artifactId>
+				<version>${joda.time.version}</version>
+			</dependency>
+
+			<!--引入kaptcha 0.0.9-->
+			<dependency>
+				<groupId>com.github.axet</groupId>
+				<artifactId>kaptcha</artifactId>
+				<version>${kaptcha.version}</version>
+			</dependency>
+
+			<!--引入google-gson 2.8.5-->
+			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>${code.gson.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>fastjson</artifactId>
+				<version>${fastjson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xhtmlrenderer</groupId>
+				<artifactId>core-renderer</artifactId>
+				<version>${xhtmlrenderer.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.itextpdf</groupId>
+				<artifactId>itextpdf</artifactId>
+				<version>${itextpdf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.lowagie</groupId>
+				<artifactId>itext</artifactId>
+				<version>${itext.version}</version>
+			</dependency>
+			<!-- SFTP工具 -->
+			<dependency>
+				<groupId>com.jcraft</groupId>
+				<artifactId>jsch</artifactId>
+				<version>${jsch.version}</version>
+			</dependency>
+
+
+		</dependencies>
+	</dependencyManagement>
+
+</project>

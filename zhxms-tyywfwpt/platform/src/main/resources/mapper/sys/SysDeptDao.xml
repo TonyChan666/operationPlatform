@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.sys.dao.SysDeptDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.sys.entity.SysDeptEntity" id="sysDeptMap">
+        <result property="deptId" column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="deptParentId" column="dept_parent_id"/>
+        <result property="deptParentName" column="dept_parent_name"/>
+        <result property="deptCode" column="dept_code"/>
+        <result property="deptDesc" column="dept_desc"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="listByAll" parameterType="Integer" resultMap="sysDeptMap">
+		SELECT t1.*,
+	           (SELECT t2.dept_name FROM sys_dept t2 WHERE t2.dept_id = t1.dept_parent_id) AS dept_parent_name
+	    FROM sys_dept t1
+	    WHERE delete_flag is null
+	</select>
+
+</mapper>

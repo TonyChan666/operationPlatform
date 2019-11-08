@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.bsm.dao.InstallDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.bsm.entity.InstallEntity" id="installMap">
+        <result property="id" column="id"/>
+        <result property="ywfwbm" column="ywfwbm"/>
+        <result property="fwqid" column="fwqid"/>
+        <result property="dkh" column="dkh"/>
+        <result property="azwz" column="azwz"/>
+        <result property="bbh" column="bbh"/>
+        <result property="cjrid" column="cjrid"/>
+        <result property="cjsj" column="cjsj"/>
+        <result property="xgrid" column="xgrid"/>
+        <result property="xgsj" column="xgsj"/>
+
+    </resultMap>
+    <update id="updateBatchByIds">
+        update bsm_intall set delete_flag="0" where id in
+        <foreach item="ids" collection="array" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+    </update>
+    <update id="updateBatchByYwfwbm">
+        update bsm_intall set delete_flag="0" where id in
+        <foreach item="ids" collection="array" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+    </update>
+    <select id="installList" parameterType="String" resultType="cn.com.bmsoft.modules.bsm.entity.InstallEntity">
+        select
+            t2.* ,
+             (select t.sbmc from rm_server t where t.id = t2.fwqid) azfwq
+            from bsm_install t2
+        where  t2.ywfwbm = #{ywfwbm}
+    </select>
+    <select id="installLogList" parameterType="cn.com.bmsoft.modules.bsm.entity.InstallEntity" resultType="cn.com.bmsoft.modules.bsm.entity.InstallEntity">
+        select * from bsm_install where  ywfwbm = #{ywfwbm} and fwqid = #{fwqid}
+    </select>
+    <select id="ywfwbmYz" parameterType="String" resultType="String">
+         select distinct ywfwbm from bsm_install where ywfwbm = #{ywfwbm}
+    </select>
+</mapper>

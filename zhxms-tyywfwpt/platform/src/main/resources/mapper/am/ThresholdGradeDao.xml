@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.am.dao.ThresholdGradeDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.am.entity.ThresholdGradeEntity" id="thresholdGradeMap">
+        <result property="id" column="id"/>
+        <result property="thresholdLevel" column="threshold_level"/>
+        <result property="requirestHandleTime" column="requirest_handle_time"/>
+        <result property="alarmType" column="alarm_type"/>
+        <result property="emailModeId" column="email_mode_id"/>
+        <result property="alarmNumber" column="alarm_number"/>
+        <result property="alarmFrequency" column="alarm_frequency"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="updateUserId" column="update_user_id"/>
+        <result property="threshold" column="threshold"/>
+        <result property="monitorFrequency" column="monitor_frequency"/>
+        <result property="pollTime" column="poll_time"/>
+        <result property="strategyId" column="strategy_id"/>
+        <result property="isOrder" column="is_order"/>
+        <result property="condtion" column="condtion"/>
+        <result property="messageModelId" column="message_model_id"/>
+        <result property="deleteFlag" column="delete_flag"/>
+
+    </resultMap>
+
+
+</mapper>

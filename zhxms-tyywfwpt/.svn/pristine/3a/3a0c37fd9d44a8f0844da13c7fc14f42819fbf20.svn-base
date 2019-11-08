@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.bsm.dao.UpgradeDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.bsm.entity.UpgradeEntity" id="upgradeMap">
+        <result property="id" column="id"/>
+        <result property="ywfwbm" column="ywfwbm"/>
+        <result property="fjid" column="fjid"/>
+        <result property="fjmc" column="fjmc"/>
+        <result property="sjrid" column="sjrid"/>
+        <result property="sjsj" column="sjsj"/>
+
+    </resultMap>
+
+</mapper>

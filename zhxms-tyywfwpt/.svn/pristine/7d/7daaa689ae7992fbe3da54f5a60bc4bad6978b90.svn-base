@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.sa.dao.SaBsmLogDao">
+
+    <!--调用情况趋势图-->
+    <select id="serviceCallTrendStatistics" parameterType="Map" resultType="Map">
+        SELECT
+            SUBSTRING(tjrq, 6, 6) AS `day`,
+            SUM(cgsl) AS cgslzs,
+            SUM(sbsl) AS sbslzs
+        FROM
+            `bsm_log_statistic`
+        WHERE
+            fwbh IN (SELECT DISTINCT(t1.ywfwbm)
+                     FROM `bsm_service` t1
+                     LEFT JOIN `bsm_install` t2
+                     ON t1.ywfwbm = t2.ywfwbm
+                     WHERE
+                        t1.status = '1'
+                        AND t1.delete_flag IS NULL
+                    )
+            <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                AND tjrq BETWEEN #{startTime} AND #{endTime}
+            </if>
+        GROUP BY tjrq
+        ORDER BY `day` ASC
+    </select>
+
+    <!--调用次数统计-->
+    <select id="serviceCallCountStatistics" parameterType="Map" resultType="Map">
+
+        SELECT
+            zs,
+            cgsl,
+            CONCAT(ROUND(cgsl / zs * 100, 0), '%') AS cgslbfb,
+            sbsl,
+            CONCAT(ROUND(sbsl / zs * 100, 0), '%') AS sbslbfb
+        FROM (
+            SELECT
+                SUM(cgsl) AS cgsl,
+                SUM(sbsl) AS sbsl,
+                SUM(cgsl + sbsl) AS zs
+            FROM
+                `bsm_log_statistic`
+            WHERE
+                fwbh IN (SELECT DISTINCT(t1.ywfwbm)
+                         FROM `bsm_service` t1
+                         LEFT JOIN `bsm_install` t2
+                         ON t1.ywfwbm = t2.ywfwbm
+                         WHERE
+                            t1.status = '1'
+                            AND t1.delete_flag IS NULL
+                        )
+                <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                    AND tjrq BETWEEN #{startTime} AND #{endTime}
+                </if>
+            ) t
+
+    </select>
+
+</mapper>

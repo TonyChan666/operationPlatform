@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.bm.dao.CheckLogDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.bm.entity.CheckLogEntity" id="checkLogMap">
+        <result property="id" column="id"/>
+        <result property="bfrzbh" column="bfrzbh"/>
+        <result property="bfid" column="bfid"/>
+        <!--<result property="bfxjsj" column="bfxjsj"/>-->
+        <result property="fwqid" column="fwqid"/>
+        <result property="ywfwid" column="ywfwid"/>
+        <result property="bfzt" column="bfzt"/>
+        <result property="cjsj" column="cjsj"/>
+    </resultMap>
+
+    <update id="updateBatchByIds">
+        update bm_check_log set delete_flag="0" where id in
+        <foreach item="ids" collection="array" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+    </update>
+    <select id="selectlogId" parameterType="Integer" resultMap="checkLogMap">
+       SELECT
+            bs.bfbh AS bfbh,
+            bs.bfmc AS bfmc,
+            bs.bflj AS bflj,
+            bs.bfsdsj AS bfsdsj,
+            bs.fwqmc AS fwqmc,
+            bs.ywfw AS ywfw,
+            bs.ywry AS ywry,
+            bcl.bfzt AS bfzt,
+            bcl.cjsj AS cjsj,
+            bcl.id AS id
+        FROM
+            (
+            SELECT
+                id,
+                bfbh,
+                bfmc,
+                bflj,
+                bfsdsj,
+                ( SELECT t.sbmc FROM rm_server t WHERE t.id = bm_strategy.fwqid ) AS fwqmc,
+                ( SELECT t.ywfwmc FROM bsm_service t WHERE t.id = bm_strategy.ywfwid ) AS ywfw,
+                ( SELECT t.NAME FROM sys_user t WHERE t.user_id = bm_strategy.ywryid ) AS ywry
+            FROM
+                bm_strategy
+            ) bs
+            LEFT JOIN bm_check_log bcl ON bs.id = bcl.bfid
+        WHERE
+            bcl.id = #{id}
+    </select>
+    <select id="queryPageList" parameterType="Map" resultMap="checkLogMap">
+        SELECT
+          bcl.bfid,
+          bs.bfmc,
+          bs.fwqid,
+          bs.ywfwid,
+          bs.bfbh,
+          bcl.id,
+          bcl.bfrzbh,
+          bcl.bfzt,
+          bcl.cjsj,
+          (select t.sbmc from rm_server t where t.id = bs.fwqid) fwqmc,
+          (select t.ywfwmc from bsm_service t where t.id = bs.ywfwid) ywfw
+        FROM
+            bm_check_log bcl
+            LEFT JOIN bm_strategy bs ON bcl.bfid = bs.id
+        <where>
+            <if test="params.bfmc != null and params.bfmc != '' ">
+                and bs.bfmc like concat('%',#{params.bfmc},'%')
+            </if>
+            <if test="params.fwqid != null and params.fwqid != ''">
+                and bs.fwqid like concat('%',#{params.fwqid},'%')
+            </if>
+            <if test="params.ywfwid != null and params.ywfwid != ''">
+                and  bs.ywfwid like concat('%',#{params.ywfwid},'%')
+            </if>
+            <if test="params.bfzt != null and params.bfzt != ''">
+                and  bcl.bfzt = #{params.bfzt}
+            </if>
+            <if test="params.startTime != null and params.startTime != ''">
+                and bcl.cjsj >= #{params.startTime}
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and bcl.cjsj &lt;= #{params.endTime}
+            </if>
+        </where>
+    </select>
+</mapper>

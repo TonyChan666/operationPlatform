@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.am.dao.AmStatusDao">
+
+    <!-- 链路数据 -->
+    <select id="link" resultType="java.lang.Integer">
+        select count(1) from am_record where resource_type = 'rm_link' and alarm_record_type = 1 and handle_status = 1
+    </select>
+
+    <!--获取字典值-->
+    <select id="getDictItem" resultType="java.util.Map">
+        select dict_code as `dict_code`,name as `name`,value as `value`,3 as `type`,0 as `status` from c_dictionary_item where dict_code = 'zylb'
+            UNION select dict_code,name, value ,2 as type,0 as status from  c_dictionary_item where dict_code = 'ywjz'
+            UNION select dict_code,name, value , 1 as type,0 as status from c_dictionary_item where dict_code = 'zcfwlx'
+    </select>
+    <!--获取存储资源数据-->
+    <select id="getStorageStatus" resultType="java.util.Map">
+        select count(*) as `count`,zylb as `zylb` from rm_storage where id in (
+		    select alarm_object from am_record where handle_status = 1 and alarm_record_type = 1 and resource_type = 'rm_storage'
+        ) GROUP BY zylb
+    </select>
+    <!--获取服务的数据-->
+    <select id="getServiceStatus" resultType="java.util.Map">
+        select zcfwlx as `zcfwlx`,id as `id`,yxzt as `yxzt`,ywjz as `ywjz` from bsm_service where yxzt != 0 and delete_flag is null
+    </select>
+    <!--获取告警记录-->
+    <select id="getAmRecord" resultType="cn.com.bmsoft.modules.am.entity.RecordEntity">
+        select ar.id,alarm_record_code,alarm_object_name,alarm_value,alarm_time,order_code,bs.ywfwbm
+        ,(select t.name from c_dictionary_item t where t.dict_code='gjzb' and t.value=ar.alarm_target) alarm_target
+        ,(select t.name from c_dictionary_item t where t.dict_code='gjdj' and t.value=ar.ALARM_GRADE) alarm_grade
+        ,(select t.name from c_dictionary_item t where t.dict_code='gjlx' and t.value=ar.ALARM_RECORD_TYPE) ALARM_RECORD_TYPE
+        from am_record ar
+        left join bsm_service  bs on ar.alarm_object = bs.ID
+        where 1 = 1
+        <if test="params.alarm_target != null and params.alarm_target != ''">
+            and alarm_target = #{params.alarm_target}
+        </if>
+        <if test="params.alarm_grade != null and params.alarm_grade != ''">
+            and alarm_grade = #{params.alarm_grade}
+        </if>
+        <if test="params.start_time != null and params.start_time != '' and params.end_time != null and params.end_time != ''">
+            and alarm_time between #{params.start_time} and #{params.end_time}
+        </if>
+        <if test="params.type == 3">
+            and alarm_record_type = 1 and alarm_object in (select id from rm_storage where zylb = #{params.value})
+        </if>
+        <if test="params.type == 1 or params.type == 2">
+            and ar.alarm_record_type = '2'
+            <if test="params.ywjz != null and params.ywjz != ''">
+                and bs.ywjz = #{params.ywjz}
+            </if>
+            <if test="params.zcfwlx != null and params.zcfwlx != ''">
+                and bs.zcfwlx = #{params.zcfwlx}
+            </if>
+        </if>
+    </select>
+</mapper>

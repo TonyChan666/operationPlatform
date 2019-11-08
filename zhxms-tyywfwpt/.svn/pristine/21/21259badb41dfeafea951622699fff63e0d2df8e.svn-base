@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.epm.dao.EmergencePlanReviewDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.epm.entity.EmergencePlanReviewEntity" id="emergencePlanReviewMap">
+        <result property="id" column="id"/>
+        <result property="rwid" column="rwid"/>
+        <result property="epid" column="epid"/>
+        <result property="yapgbh" column="yapgbh"/>
+        <result property="ywryid" column="ywryid"/>
+        <result property="clzt" column="clzt"/>
+        <result property="pj" column="pj"/>
+        <result property="yjjy" column="yjjy"/>
+        <result property="createUser" column="create_user"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateUser" column="update_user"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="status" column="status"/>
+        <result property="name" column="name"/>
+        <result property="providerName" column="provider_name"/>
+        <result property="pjName" column="pjName"/>
+        <result property="createReviewUser" column="createReviewUser"/>
+        <result property="createReviewTime" column="createReviewTime"/>
+
+    </resultMap>
+
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, rwid, yapgbh, ywryid, clzt, pj, yjjy, create_user, create_time, update_user, update_time, status,epid
+    </sql>
+
+
+    <select id="emergencePlanReviewQueryList" parameterType="Map" resultMap="emergencePlanReviewMap">
+        SELECT
+        eepr.*,su.`NAME`,sp.provider_name,cdi.`NAME` as pjName
+        FROM  epm_plan_review AS eepr,sys_user su,sys_provider sp,c_dictionary_item cdi
+        where eepr.create_user=su.user_id and su.provider_id=sp.provider_id and eepr.pj=cdi.`VALUE` and eepr.status='1'
+        <if test="params.rwid !=null and params.rwid != '' ">
+            AND eepr.rwid = #{params.rwid}
+        </if>
+        <if test="params.epid !=null and params.epid != '' ">
+            AND eepr.epid = #{params.epid}
+        </if>
+        <if test="params.createUser !=null and params.createUser != '' ">
+            AND eepr.create_user = #{params.createUser}
+        </if>
+        <if test="params.clzt !=null and params.clzt != '' ">
+            AND eepr.clzt = #{params.clzt}
+        </if>
+        <if test="params.ywryid !=null and params.ywryid != '' ">
+            AND eepr.ywryid = #{params.ywryid}
+        </if>
+
+        ORDER BY eepr.create_time desc
+
+    </select>
+
+    <select id="emergencePlanReviewQueryList1" parameterType="Map" resultMap="emergencePlanReviewMap">
+        SELECT
+        eepr.*,su.`name`,sp.provider_name,cdi.`name` as pjName
+        FROM  epm_plan_review AS eepr,sys_user su,sys_provider sp,c_dictionary_item cdi
+        where eepr.create_user=su.user_id and su.provider_id=sp.provider_id and eepr.pj=cdi.`value` and eepr.status='1'
+        <if test="params.rwid !=null and params.rwid != '' ">
+            AND eepr.rwid = #{params.rwid}
+        </if>
+        <if test="params.epid !=null and params.epid != '' ">
+            AND eepr.epid = #{params.epid}
+        </if>
+        <if test="params.createUser !=null and params.createUser != '' ">
+            AND eepr.create_user = #{params.createUser}
+        </if>
+        <if test="params.clzt !=null and params.clzt != '' ">
+            AND eepr.clzt = #{params.clzt}
+        </if>
+        <if test="params.ywryid !=null and params.ywryid != '' ">
+            AND eepr.ywryid = #{params.ywryid}
+        </if>
+
+        ORDER BY eepr.create_time desc
+
+    </select>
+
+
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.rm.dao.ProbeDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.rm.entity.ProbeEntity" id="probeMap">
+        <result property="id" column="id"/>
+        <result property="tzbh" column="tzbh"/>
+        <result property="tzyymc" column="tzyymc"/>
+        <result property="tzpz" column="tzpz"/>
+        <result property="jrpz" column="jrpz"/>
+        <result property="ywjz" column="ywjz"/>
+        <result property="pzfwq" column="pzfwq"/>
+        <result property="acessKey" column="acess_key"/>
+        <result property="tspl" column="tspl"/>
+        <result property="tzsm" column="tzsm"/>
+        <result property="cjrid" column="cjrid"/>
+        <result property="cjsj" column="cjsj"/>
+        <result property="xgrid" column="xgrid"/>
+        <result property="xgsj" column="xgsj"/>
+        <result property="sfyx" column="sfyx"/>
+    </resultMap>
+
+    <update id="removeToRecoveryByIds" parameterType="java.util.List">
+        update rm_probe set delete_flag = 0 where id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+
+</mapper>
