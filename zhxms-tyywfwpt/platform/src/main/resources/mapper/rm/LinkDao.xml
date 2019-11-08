@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.rm.dao.LinkDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.rm.entity.LinkEntity" id="LinkMap">
+        <result property="id" column="id"/>
+        <result property="llbm" column="llbm"/>
+        <result property="llmc" column="llmc"/>
+        <result property="dk" column="dk"/>
+        <result property="ywryid" column="ywryid"/>
+        <result property="bzsm" column="bzsm"/>
+        <result property="cjrid" column="cjrid"/>
+        <result property="cjsj" column="cjsj"/>
+        <result property="xgrid" column="xgrid"/>
+        <result property="xgsj" column="xgsj"/>
+        <result property="sfyx" column="sfyx"/>
+    </resultMap>
+
+    <select id="getLink" parameterType="int" resultType="cn.com.bmsoft.modules.rm.entity.LinkEntity">
+        select re.*,name as `ywry`,us.name as `ywrymc` from rm_link re LEFT JOIN sys_user us on re.ywryid = us.user_id
+        where  re.delete_flag is null
+        and re.id = #{id}
+    </select>
+
+    <select id="getLinkList" parameterType="Map" resultType="cn.com.bmsoft.modules.rm.entity.LinkEntity">
+        select re.*,us.name as `ywry`,us.name as `ywrymc` from rm_link re JOIN sys_user us on re.ywryid = us.user_id
+        <if test="params.ywry != null and params.ywry != ''">
+            and us.name like concat(concat('%',#{params.ywry}),'%')
+        </if>
+        where 1=1 and re.delete_flag is null
+        <if test="params.llmc != null and params.llmc != ''">
+            and re.llmc like concat(concat('%',#{params.llmc}),'%')
+        </if>
+        <if test="params.dk != null and params.dk != ''">
+            and re.dk like concat(concat('%',#{params.dk}),'%')
+        </if>
+        <!--<if test="params.ywryid != null and params.ywryid != ''">
+            and re.ywryid like concat(concat('%',#{params.ywryid}),'%')
+        </if>-->
+        <if test="params.sfyx != null and params.sfyx != ''">
+            and re.sfyx like concat(concat('%',#{params.sfyx}),'%')
+        </if>
+        <if test="params.fwqid != null and params.fwqid != ''">
+            and re.id in (
+                select llid from rm_link_device where sbid = #{params.fwqid} and sbbm = 'rm_server'
+            )
+        </if>
+    </select>
+
+    <select id="getDevicesBylinkId" parameterType="Integer" resultType="cn.com.bmsoft.modules.rm.entity.LinkDeviceEntity">
+        select de.*  from rm_link_device de where de.llid = #{linkId}
+    </select>
+
+    <update id="removeToRecoveryByIds" parameterType="java.util.List">
+        update rm_link set delete_flag = 0 where id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+
+</mapper>

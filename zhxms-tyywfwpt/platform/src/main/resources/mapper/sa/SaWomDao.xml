@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.sa.dao.SaWomDao">
+
+    <!--工单数量趋势统计-->
+    <select id="quantityTrendOfWorkOrder" parameterType="Map" resultType="Map">
+        SELECT
+            to_char(cjsj, '${format}') AS `date`,
+            COUNT(gdbh) AS `value`
+        FROM wom_information
+        WHERE 1=1
+        <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+            AND cjsj BETWEEN #{startTime} AND #{endTime}
+        </if>
+        GROUP BY to_char(cjsj, '${format}')
+        ORDER BY `date` ASC
+    </select>
+
+    <!--上月工单数统计-->
+    <select id="workOrderOfLastMonth" parameterType="Map" resultType="Map">
+        SELECT
+        -- 上月数
+        t.last_month_count,
+        -- 环比
+        FORMAT(((t.last_month_count - t.last_last_month_count)/t.last_last_month_count) * 100, 0)
+        AS month_on_month,
+        -- 同比
+        FORMAT(((t.last_month_count - t.last_year_month_count)/t.last_year_month_count) * 100, 0)
+        AS year_on_year
+        FROM
+        (
+            SELECT
+                t1.last_month_count,
+                t2.last_last_month_count,
+                t3.last_year_month_count
+            FROM
+                (-- 上月
+            SELECT
+                COUNT( * ) AS last_month_count
+            FROM
+                wom_information
+            WHERE
+                DATE_FORMAT( cjsj, '%Y-%m' ) = DATE_FORMAT( DATE_SUB( curdate( ), INTERVAL 1 MONTH ), '%Y-%m' )
+                ) t1,
+                (-- 上上月
+            SELECT
+                COUNT( * ) AS last_last_month_count
+            FROM
+                wom_information
+            WHERE
+                DATE_FORMAT( cjsj, '%Y-%m' ) = DATE_FORMAT( DATE_SUB( curdate( ), INTERVAL 2 MONTH ), '%Y-%m' )
+                ) t2,
+                (-- 去年上月
+            SELECT
+                COUNT( * ) AS last_year_month_count
+            FROM
+                wom_information
+            WHERE
+                DATE_FORMAT( cjsj, '%Y-%m' ) = DATE_FORMAT( DATE_SUB( curdate( ), INTERVAL 13 MONTH ), '%Y-%m' )
+                ) t3
+        ) t
+    </select>
+
+    <!--上月工单解决率统计-->
+    <select id="workOrderResolutionRateOfLastMonth" parameterType="Map" resultType="Map">
+        SELECT
+            -- 上月解决率
+            t3.last_month_solve_rate,
+            -- t6.month_on_month_solve_rate,
+            -- t9.year_on_year_solve_rate,
+            -- 上月环比解决率浮动
+            (t3.last_month_solve_rate - t6.month_on_month_solve_rate) AS month_on_month_solve_rate_float,
+            -- 上月同比解决率浮动
+            (t3.last_month_solve_rate - t9.year_on_year_solve_rate) AS year_on_year_solve_rate_float
+        FROM
+        (
+            -- 上月解决率
+            SELECT
+                t1.last_month_solve_count,
+                t2.last_month_count,
+                FORMAT(((t1.last_month_solve_count - t2.last_month_count)/t2.last_month_count) * 100, 0)
+                AS last_month_solve_rate
+            FROM
+            (
+                SELECT
+                    COUNT( * ) AS last_month_solve_count
+                FROM
+                    wom_information
+                WHERE
+                    DATE_FORMAT( cjsj, '%Y-%m' ) = DATE_FORMAT( DATE_SUB( curdate( ), INTERVAL 1 MONTH ), '%Y-%m' )
+                    AND gdzt = '5'
+            ) t1,
+            (
+                SELECT
+                    COUNT( * ) AS last_month_count
+                FROM
+                    wom_information
+                WHERE
+                    DATE_FORMAT( cjsj, '%Y-%m' ) = DATE_FORMAT( DATE_SUB( curdate( ), INTERVAL 1 MONTH ), '%Y-%m' )
+            ) t2
+        ) t3,
+        (
+            -- 环比解决率
+            SELECT
+                t4.last_last_month_solve_count,
+                t5.last_last_month_count,
+                FORMAT(((t4.last_last_month_solve_count - t5.last_last_month_count)/t5.last_last_month_count) * 100, 0)
+                AS month_on_month_solve_rate
+            FROM
+            (
+                SELECT
+                    COUNT( * ) AS last_last_month_solve_count
+                FROM
+                    wom_information
+                WHERE
+                    DATE_FORMAT( cjsj, '%Y-%m' ) = DATE_FORMAT( DATE_SUB( curdate( ), INTERVAL 2 MONTH ), '%Y-%m' )
+                    AND gdzt = '5'
+            ) t4,
+            (
+                SELECT
+                    COUNT( * ) AS last_last_month_count
+                FROM
+                    wom_information
+                WHERE
+                    DATE_FORMAT( cjsj, '%Y-%m' ) = DATE_FORMAT( DATE_SUB( curdate( ), INTERVAL 2 MONTH ), '%Y-%m' )
+            ) t5
+        ) t6,
+        (
+            -- 同比解决率
+            SELECT
+                t7.last_year_month_solve_count,
+                t8.last_year_month_count,
+                FORMAT(((t7.last_year_month_solve_count - t8.last_year_month_count)/t8.last_year_month_count) * 100, 0)
+                AS year_on_year_solve_rate
+            FROM
+            (
+                SELECT
+                    COUNT( * ) AS last_year_month_solve_count
+                FROM
+                    wom_information
+                WHERE
+                    DATE_FORMAT( cjsj, '%Y-%m' ) = DATE_FORMAT( DATE_SUB( curdate( ), INTERVAL 13 MONTH ), '%Y-%m' )
+                    AND gdzt = '5'
+            ) t7,
+            (
+                SELECT
+                    COUNT( * ) AS last_year_month_count
+                FROM
+                    wom_information
+                WHERE
+                    DATE_FORMAT( cjsj, '%Y-%m' ) = DATE_FORMAT( DATE_SUB( curdate( ), INTERVAL 13 MONTH ), '%Y-%m' )
+            ) t8
+        ) t9
+    </select>
+
+    <!--工单类型占比统计-->
+    <select id="proportionOfWorkOrderType" parameterType="Map" resultType="Map">
+        SELECT
+            (SELECT name FROM c_dictionary_item WHERE dict_code = 'gdlx' AND value = t1.gdlx) `name`,
+            t1.gdlxsl AS `value`,
+            CONCAT(ROUND(t1.gdlxsl / t2.totalCount * 100, 0), '%') AS `percent`
+        FROM
+            (SELECT gdlx, COUNT(gdlx) AS gdlxsl
+             FROM wom_information
+             WHERE 1=1
+             <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                 AND cjsj BETWEEN #{startTime} AND #{endTime}
+             </if>
+             GROUP BY gdlx) t1,
+            (SELECT COUNT(*) AS totalCount
+             FROM wom_information
+             WHERE 1=1
+             <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                 AND cjsj BETWEEN #{startTime} AND #{endTime}
+             </if>
+             ) t2
+    </select>
+
+    <!--排名前十的工单创建人统计-->
+    <select id="workOrderCreaterOfTopTen" parameterType="Map" resultType="Map">
+        SELECT
+            (SELECT name FROM sys_user WHERE user_id = t1.cjrid) AS `name`,
+            t1.gdsl AS `num`
+        FROM (
+            SELECT cjrid, COUNT(*) AS gdsl
+            FROM wom_information
+            WHERE 1=1
+            <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                AND cjsj BETWEEN #{startTime} AND #{endTime}
+            </if>
+            GROUP BY cjrid
+            ORDER BY gdsl
+            DESC LIMIT 0,10
+        ) t1
+    </select>
+
+    <select id="workOrder" resultType="java.util.Map">
+        select t.`work_order_count`, t3.`solve_rate`
+        FROM
+            (-- 工单统计数
+                SELECT
+                    COUNT( * ) AS `work_order_count`
+                FROM
+                    wom_information
+                WHERE 1=1 and
+                    cjsj between #{startTime} and #{endTime}
+            ) t,
+            (
+            -- 工单解决率
+            SELECT
+                ROUND(((t1.last_month_solve_count)/t2.last_month_count) * 100, 0)
+                AS `solve_rate`
+            FROM
+                (
+                    SELECT
+                        COUNT( * ) AS last_month_solve_count
+                    FROM
+                        wom_information
+                    WHERE 1=1 and
+                        cjsj between #{startTime} and #{endTime}
+                        AND gdzt = '5'
+                ) t1,
+                (
+                    SELECT
+                        COUNT( * ) AS last_month_count
+                    FROM
+                        wom_information
+                    WHERE 1=1 and
+                        cjsj between #{startTime} and #{endTime}
+                ) t2
+            ) t3
+    </select>
+
+</mapper>

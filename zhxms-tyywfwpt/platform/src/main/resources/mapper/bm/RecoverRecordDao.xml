@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.bm.dao.RecoverRecordDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.bm.entity.RecoverRecordEntity" id="recoverRecordMap">
+        <result property="id" column="id"/>
+        <result property="hfclbh" column="hfclbh"/>
+        <result property="bfid" column="bfid"/>
+        <result property="hfclmc" column="hfclmc"/>
+        <result property="hfgcjl" column="hfgcjl"/>
+        <result property="hfsj" column="hfsj"/>
+        <result property="hfyy" column="hfyy"/>
+        <result property="cjrid" column="cjrid"/>
+        <result property="cjsj" column="cjsj"/>
+        <result property="xgrid" column="xgrid"/>
+        <result property="xgsj" column="xgsj"/>
+        <result property="sfyx" column="sfyx"/>
+        <result property="fjid" column="fjid"/>
+        <result property="ywfwid" column="ywfwid"/>
+        <result property="ywryid" column="ywryid"/>
+        <result property="fwqid" column="fwqid"/>
+        <result property="delete_flag" column="delete_flag"/>
+    </resultMap>
+
+    <update id="updateBatchByIds">
+        update bm_recover_record set delete_flag='0' where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+    <select id="selectRecoverRecorListPage" parameterType="Map" resultMap="recoverRecordMap">
+        SELECT
+        bm_recover_record.id AS id,
+        bm_recover_record.bfid AS bfid,
+        bm_recover_record.fwqid AS fwqid,
+        bm_recover_record.ywfwid AS ywfwid,
+        bm_recover_record.hfclbh AS hfclbh,
+        bm_recover_record.hfclmc AS hfclmc,
+        bm_recover_record.ywryid AS ywryid,
+        bm_recover_record.hfsj as hfsj,
+        bm_recover_record.cjsj AS cjsj,
+        bm_recover_record.fjid AS fjid,
+        (select t.name from sys_user t where t.user_id = bm_recover_record.ywryid) ywry,
+        (select t.sbmc from rm_server t where t.id = bm_recover_record.fwqid) fwqmc,
+        (select t.ywfwmc from bsm_service t where t.id = bm_recover_record.ywfwid) ywfw,
+        (select t.bfmc from bm_strategy t where t.id = bm_recover_record.bfid) bfmc
+        FROM bm_recover_record
+        where bm_recover_record.delete_flag is null
+        <if test="params.bfclids != null and params.bfclids.size()>0 ">
+            and bfid in
+            <foreach collection="params.bfclids" item="bfclid" index="index" open="(" close=")" separator=",">
+                #{bfclid}
+            </foreach>
+        </if>
+        <if test="params.fwqid != null and params.fwqid != ''">
+            and fwqid = #{params.fwqid}
+        </if>
+        <if test="params.ywfwid != null and params.ywfwid != ''">
+            and ywfwid = #{params.ywfwid}
+        </if>
+        <if test="params.ywryids != null and params.ywryids.size() > 0 ">
+            and ywryid in
+            <foreach collection="params.ywryids" item="ywryid" index="index" open="(" close=")" separator=",">
+                #{ywryid}
+            </foreach>
+        </if>
+        <if test="params.startTime != null and params.startTime != ''">
+            and hfsj >= #{params.startTime}
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            and hfsj &lt;= #{params.endTime}
+        </if>
+    </select>
+
+
+
+</mapper>

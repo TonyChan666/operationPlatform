@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.am.dao.EmailRecordDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.am.entity.EmailRecordEntity" id="emailRecordMap">
+        <result property="id" column="id"/>
+        <result property="sendTime" column="send_time"/>
+        <result property="receiveAddress" column="receive_address"/>
+        <result property="receiveName" column="receive_name"/>
+        <result property="emailType" column="email_type"/>
+        <result property="emailTitle" column="email_title"/>
+        <result property="emailContent" column="email_content"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="deleteFlag" column="delete_flag"/>
+
+    </resultMap>
+
+
+</mapper>

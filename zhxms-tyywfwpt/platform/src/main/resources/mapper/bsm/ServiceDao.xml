@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.bsm.dao.ServiceDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.bsm.entity.ServiceEntity" id="serviceMap">
+        <result property="id" column="id"/>
+        <result property="ywfwbm" column="ywfwbm"/>
+        <result property="ywfwmc" column="ywfwmc"/>
+        <result property="bbh" column="bbh"/>
+        <result property="jkxy" column="jkxy"/>
+        <result property="url" column="url"/>
+        <result property="zh" column="zh"/>
+        <result property="mm" column="mm"/>
+        <result property="ywjz" column="ywjz"/>
+        <result property="ywks" column="ywks"/>
+        <result property="ywry" column="ywry"/>
+        <result property="gl" column="gl"/>
+        <result property="cjrid" column="cjrid"/>
+        <result property="cjsj" column="cjsj"/>
+        <result property="xgrid" column="xgrid"/>
+        <result property="xgsj" column="xgsj"/>
+        <result property="status" column="status"/>
+        <result property="yxzt" column="yxzt"/>
+        <result property="ssywz" column="ssywz"/>
+        <result property="ssywxtid" column="ssywxtid"/>
+        <result property="zcfwlx" column="zcfwlx"/>
+        <result property="fwlx" column="fwlx"/>
+        <result property="delete_flag" column="delete_flag"/>
+    </resultMap>
+    <update id="updateBatchByIds" >
+        UPDATE bsm_service s  set s.delete_flag='0' where s.id in
+        <foreach item="ids" collection="array" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+    </update>
+    <select id="ListPage" parameterType="Map" resultType="Map">
+        select
+        t1.id id,
+        t1.ywfwbm ywfwbm,
+        t1.ywfwmc ywfwmc,
+        t1.bbh bbh,
+        t1.jkxy jkxy,
+        t1.ywks ywks,
+        t1.ywjz ywjz,
+        t1.ywryid,
+        t2.fwqid,
+        t1.status status,
+        (select t.name  from sys_user t where t.user_id = t1.ywryid) ywrymc,
+         GROUP_CONCAT((select t.sbmc from rm_server t where t.id = t2.fwqid)) azfwq,
+        (select t.name from c_dictionary_item t where t.dict_code='ryzt' and t.value=t1.status) status,
+        (select t.name from c_dictionary_item t where t.dict_code='ywks' and t.value=t1.ywks) ywksmc,
+        (select t.name from c_dictionary_item t where t.dict_code='ywjz' and t.value=t1.ywjz) ywjzmc,
+        (select t.name from c_dictionary_item t where t.dict_code='jkxy' and t.value=t1.jkxy) jkxymc
+        FROM  bsm_service t1 LEFT JOIN rm_deployment_info t2 on t1.id = t2.zyid
+        WHERE t2.zybm = "bsm_service" and t1.delete_flag is null
+        <if test="params.ywfwbm != null and params.ywfwbm != '' ">
+            and ywfwbm like concat('%',#{params.ywfwbm},'%')
+        </if>
+        <if test="params.ywfwmc != null and params.ywfwmc != ''">
+            and ywfwmc like concat('%',#{params.ywfwmc},'%')
+        </if>
+        <if test="params.bbh != null and params.bbh != ''">
+            and  t1.bbh like concat('%',#{params.bbh},'%')
+        </if>
+        <if test="params.jkxy != null and params.jkxy != ''">
+            and jkxy like concat('%',#{params.jkxy},'%')
+        </if>
+        <if test="params.url != null and params.url != ''">
+            and url like concat('%',#{params.url},'%')
+        </if>
+        <if test="params.ywjz != null and params.ywjz != ''">
+            and ywjz like concat('%',#{params.ywjz},'%')
+        </if>
+        <if test="params.ywks != null and params.ywks != ''">
+            and ywks like concat('%',#{params.ywks},'%')
+        </if>
+        <if test="params.fwqid != null and params.fwqid != ''">
+            and t2.fwqid like concat('%',#{params.fwqid},'%')
+        </if>
+        <if test="params.ywryid != null and params.ywryid != ''">
+            and t1.ywryid like concat('%',#{params.ywryid},'%')
+        </if>
+        <if test="params.status != null and params.status != ''">
+            and status like concat('%',#{params.status},'%')
+        </if>
+
+    </select>
+    <select id="getServiceList" parameterType="Map" resultType="cn.com.bmsoft.modules.bsm.entity.ServiceEntity">
+        select
+        t1.id id,
+        t1.ywfwbm ywfwbm,
+        t1.ywfwmc ywfwmc,
+        t1.bbh bbh,
+        t1.jkxy jkxy,
+        t1.ywks ywks,
+        t1.ywjz ywjz,
+        t1.ywryid,
+        us.name ywry,
+        t1.status status,
+        (select t.name  from sys_user t where t.user_id = t1.ywryid) ywrymc,
+        (select t.name from c_dictionary_item t where t.dict_code='ryzt' and t.value=t1.status) status,
+        (select t.name from c_dictionary_item t where t.dict_code='ywks' and t.value=t1.ywks) ywksmc,
+        (select t.name from c_dictionary_item t where t.dict_code='ywjz' and t.value=t1.ywjz) ywjzmc,
+        (select t.name from c_dictionary_item t where t.dict_code='jkxy' and t.value=t1.jkxy) jkxymc
+        FROM  bsm_service t1
+        left join sys_user us on t1.ywryid = us.user_id
+        WHERE  t1.delete_flag is null
+        <if test="params.ywfwbm != null and params.ywfwbm != '' ">
+            and ywfwbm like concat('%',#{params.ywfwbm},'%')
+        </if>
+        <if test="params.ywfwmc != null and params.ywfwmc != ''">
+            and ywfwmc like concat('%',#{params.ywfwmc},'%')
+        </if>
+        <if test="params.bbh != null and params.bbh != ''">
+            and  t1.bbh like concat('%',#{params.bbh},'%')
+        </if>
+        <if test="params.jkxy != null and params.jkxy != ''">
+            and jkxy like concat('%',#{params.jkxy},'%')
+        </if>
+        <if test="params.url != null and params.url != ''">
+            and url like concat('%',#{params.url},'%')
+        </if>
+        <if test="params.ywjz != null and params.ywjz != ''">
+            and ywjz like concat('%',#{params.ywjz},'%')
+        </if>
+        <if test="params.ywks != null and params.ywks != ''">
+            and ywks like concat('%',#{params.ywks},'%')
+        </if>
+        <if test="(params.azfwq != null and params.azfwq != '') or (params.fwqid != null and params.fwqid != '')">
+            and id in (select zyid from rm_deployment_info info
+            left join rm_server ser on info.fwqid = ser.id
+            where 1=1
+            <if test="params.azfwq != null and params.azfwq != ''">
+                and ser.sbmc like concat(concat('%',#{params.azfwq}),'%')
+            </if>
+            <if test="params.fwqid != null and params.fwqid != ''">
+                and ser.id = #{params.fwqid}
+            </if>
+            )
+        </if>
+        <if test="params.ywryid != null and params.ywryid != ''">
+            and t1.ywryid like concat('%',#{params.ywryid},'%')
+        </if>
+        <if test="params.status != null and params.status != ''">
+            and status like concat('%',#{params.status},'%')
+        </if>
+
+    </select>
+
+    <select id="getServiceById" parameterType="Integer"  resultType="cn.com.bmsoft.modules.bsm.entity.ServiceEntity">
+         select
+            t2.* ,
+             (select t.name  from sys_user t where t.user_id = t2.ywryid) ywry
+            from bsm_service t2
+        where  t2.id = #{id}
+    </select>
+    <select id="selectUpgrade" parameterType="String" resultType="cn.com.bmsoft.modules.bsm.entity.ServiceEntity">
+        select zhxgr,zhxgsj,id,sjid
+       from bsm_service where  ywfwbm = #{ywfwbm}
+    </select>
+    <select id="logInfo" parameterType="Integer" resultType="cn.com.bmsoft.modules.bsm.entity.ServiceEntity">
+        select * from bsm_service s LEFT JOIN bsm_install  i on  s.ywfwbm = i.ywfwbm where i.xxzt = s.xxzt and s.id =#{id}
+    </select>
+    <select id="getId" parameterType="String" resultType="Integer">
+        select id from
+        (select max(zhxgsj),id from bsm_service where ywfwbm = #{ywfwbm})t
+    </select>
+    <select id="ywfwbmYz" parameterType="String" resultType="String">
+         select distinct ywfwbm from bsm_service where ywfwbm = #{ywfwbm}
+    </select>
+    <select id="ywfwlist" parameterType="Integer" resultType="cn.com.bmsoft.modules.bsm.entity.ServiceEntity">
+       SELECT DISTINCT
+            s.ywfwmc ywfwmc,
+            s.id
+        FROM
+            rm_deployment_info i
+            LEFT JOIN bsm_service s ON i.zyid = s.id
+        WHERE zybm = 'bsm_service' and status = '1' and delete_flag is null and
+            i.fwqid = #{id}
+    </select>
+
+    <select id="getDeploymentInfos" parameterType="java.util.List" resultType="cn.com.bmsoft.modules.rm.entity.DeploymentInfoEntity">
+        select info.*,ser.sbmc as azfwq from rm_deployment_info info
+        left join rm_server ser on info.fwqid = ser.id
+        where zybm = 'bsm_service' and zyid in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+    <delete id="deleteInstalls" >
+        delete from rm_deployment_info  where zybm = 'bsm_service' and zyid
+        in
+        (select id from bsm_service where id in
+        <foreach item="ids" collection="array" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+        )
+    </delete>
+    <delete id="deleteUpgrades" >
+        delete from  bsm_upgrade where ywfwbm
+        in
+        (select ywfwbm from bsm_service where id in
+        <foreach item="ids" collection="array" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+        )
+    </delete>
+</mapper>

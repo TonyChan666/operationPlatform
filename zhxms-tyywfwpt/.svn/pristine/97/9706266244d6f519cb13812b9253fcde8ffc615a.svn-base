@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.wom.dao.ProcessDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.wom.entity.ProcessEntity" id="processMap">
+        <result property="id" column="id"/>
+        <result property="gdhjid" column="gdhjid"/>
+        <result property="gdbh" column="gdbh"/>
+        <result property="blsx" column="blsx"/>
+        <result property="gdzt" column="gdzt"/>
+        <result property="gdsm" column="gdsm"/>
+        <result property="tzqd" column="tzqd"/>
+        <result property="cjrid" column="cjrid"/>
+        <result property="cjsj" column="cjsj"/>
+        <result property="xgrid" column="xgrid"/>
+        <result property="xgsj" column="xgsj"/>
+        <result property="gdjsrid" column="gdjsrid"/>
+        <result property="sfyx" column="sfyx"/>
+        <result property="delete_flag" column="delete_flag"/>
+        <result property="pfrid" column="pfrid"/>
+        <result property="bpfrid" column="bpfrid"/>
+    </resultMap>
+    <!--获取派发信息-->
+    <select id="paifaInfo" parameterType="Integer" resultType="cn.com.bmsoft.modules.wom.entity.ProcessEntity">
+        select
+        wp.id,
+        wp.xgsj pfsj,
+        wp.gdsm,
+        (select t.name  from sys_user t where t.user_id = wp.xgrid) pfrid,
+        (select t.name  from sys_user t where t.user_id = wp.gdjsrid) bpfrid
+        from wom_process wp where  wp.gdzt='1' and
+         wp.gdbh in (select gdbh from wom_information where id=#{id})
+    </select>
+    <!--获取处理信息-->
+    <select id="handleProcessInfo" parameterType="Integer" resultType="Map">
+        select
+         wp.id as `id`,
+        wp.cjsj AS `jssj`,
+        wp.xgsj AS `clsj`,
+        wh.gdclzt as `gdclzt`,
+        wh.wtfx as `wtfx`,
+        wh.jjfa as `jjfa`,
+        (select t.name  from sys_user t where t.user_id = wp.xgrid) as `clrid`
+         from wom_process wp LEFT JOIN wom_handle_information wh on wp.gdhjid = wh.gdhjid where  wp.gdzt='3' and
+         wp.gdbh in (select gdbh from wom_information where id=#{id})
+    </select>
+    <!--获取审核信息-->
+    <select id="auditRecordsInfo" parameterType="Integer" resultType="Map">
+        select
+         wp.id as `id`,
+         wp.xgsj AS `shsj`,
+         wh.gdclzt as `gdclzt`,
+         wh.clsm as `clsm`,
+        (select t.name  from sys_user t where t.user_id = wp.xgrid) as  `shrid`
+         from wom_process wp LEFT JOIN wom_handle_information wh on wp.gdhjid = wh.gdhjid where  wp.gdzt ='5' and
+        wp.gdbh in (select gdbh from wom_information where id=#{id})
+    </select>
+    <!--获取办结信息-->
+    <select id="transferredRecordsInfo" parameterType="Integer" resultType="Map">
+        select
+         wp.id as `id`,
+        wp.xgsj AS `bjsj`,
+        wh.gdclzt as `gdclzt`,
+        wh.clsm as  `clsm`,
+        (select t.name  from sys_user t where t.user_id = wp.xgrid) as  `bjrid`
+         from wom_process wp LEFT JOIN wom_handle_information wh on wp.gdhjid = wh.gdhjid where  wp.gdzt ='7' and
+        wp.gdbh in (select gdbh from wom_information where id=#{id})
+    </select>
+    <!--获取派发时间，办理时限-->
+    <select id="infoBygdbh" parameterType="String" resultType="cn.com.bmsoft.modules.wom.entity.ProcessEntity">
+        select blsx,min(cjsj) as pfsj
+        from  wom_process where gdbh = #{gdbh} and delete_flag is null and blsx is not null group by gdbh,blsx
+    </select>
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.rm.dao.LinkDeviceDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.rm.entity.LinkDeviceEntity" id="linkDeviceMap">
+        <result property="id" column="id"/>
+        <result property="llid" column="llid"/>
+        <result property="sbbm" column="sbbm"/>
+        <result property="sbbmmc" column="sbbmmc"/>
+        <result property="sbid" column="sbid"/>
+        <result property="sbmc" column="sbmc"/>
+        <result property="sfyx" column="sfyx"/>
+    </resultMap>
+
+    <insert id="saveLinkDevices" parameterType="java.util.List">
+        insert into rm_link_device(llid,sbbm,sbid,sbbmmc,sbmc,sfyx) values
+        <foreach collection="list" index="index" item="item" open="" separator="," close="">
+            (#{item.llid},#{item.sbbm},#{item.sbid},#{item.sbbmmc},#{item.sbmc},1)
+        </foreach>
+    </insert>
+
+    <delete id="deleteLinkDevices" parameterType="java.util.List">
+        delete from rm_link_device where id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="removeLinkDevicesByLinkId" parameterType="java.util.List">
+        delete from rm_link_device where llid in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

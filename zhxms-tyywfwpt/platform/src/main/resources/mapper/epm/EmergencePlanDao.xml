@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.epm.dao.EmergencePlanDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.epm.entity.EmergencePlanEntity" id="emergencePlanMap">
+        <result property="id" column="id"/>
+        <result property="yjyabh" column="yjyabh"/>
+        <result property="yjyamc" column="yjyamc"/>
+        <result property="yjlx" column="yjlx"/>
+        <result property="yjxyjb" column="yjxyjb"/>
+        <result property="yanrms" column="yanrms"/>
+        <result property="yazt" column="yazt"/>
+        <result property="sfyps" column="sfyps"/>
+        <result property="sfypg" column="sfypg"/>
+        <result property="fjid" column="fjid"/>
+        <result property="createUser" column="create_user"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateUser" column="update_user"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="status" column="status"/>
+        <result property="reviewUser" column="review_user"/>
+        <result property="assessUser" column="assess_user"/>
+        <result property="deleteFlag" column="delete_flag"/>
+    </resultMap>
+
+    <resultMap type="cn.com.bmsoft.modules.epm.entity.EmergencePlanEntityExtend" id="emergencePlanQueryExtend">
+        <result property="id" column="id"/>
+        <result property="yjyabh" column="yjyabh"/>
+        <result property="yjyamc" column="yjyamc"/>
+        <result property="yjlx" column="yjlx"/>
+        <result property="yjxyjb" column="yjxyjb"/>
+        <result property="yanrms" column="yanrms"/>
+        <result property="yazt" column="yazt"/>
+        <result property="sfyps" column="sfyps"/>
+        <result property="sfypg" column="sfypg"/>
+        <result property="fjid" column="fjid"/>
+        <result property="createUser" column="create_user"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateUser" column="update_user"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="status" column="status"/>
+        <result property="reviewUser" column="review_user"/>
+        <result property="assessUser" column="assess_user"/>
+        <result property="name" column="original_file_name"/>
+        <result property="taskStatus" column="taskStatus"/>
+        <result property="deleteFlag" column="delete_flag"/>
+        <result property="rwmc" column="rwmc"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, yjyabh, yjyamc, yjlx, yjxyjb, yanrms, yazt, sfyps, sfypg, fjid, create_user, create_time, update_user, update_time, status, review_user, assess_user,delete_flag
+    </sql>
+
+    <select id="emergencePlanQueryList" parameterType="Map" resultMap="emergencePlanQueryExtend">
+        SELECT
+        eep.*,ca.original_file_name
+        FROM  epm_plan  eep,c_attachment ca
+        where
+        eep.fjid=ca.id AND eep. delete_flag is  NULL
+        <if test="params.yjyabh !=null and params.yjyabh != '' ">
+            AND eep.yjyabh = #{params.yjyabh}
+        </if>
+        <if test="params.yjyamc !=null and params.yjyamc != '' ">
+            and eep.yjyamc like concat('%',#{params.yjyamc},'%')
+        </if>
+        <if test="params.yjlx !=null and params.yjlx != '' ">
+            AND eep.yjlx = #{params.yjlx}
+        </if>
+        <if test="params.yjxyjb !=null and params.yjxyjb != '' ">
+            AND eep.yjxyjb = #{params.yjxyjb}
+        </if>
+        <if test="params.yazt !=null and params.yazt != '' ">
+            AND eep.yazt = #{params.yazt}
+        </if>
+        <if test="params.status !=null and params.status != '' ">
+            AND eep.status = #{params.status}
+        </if>
+        <if test="params.deleteFlag !=null and params.deleteFlag != '' ">
+            AND eep.delete_flag = #{params.deleteFlag}
+        </if>
+
+        <if test="params.sfyps !=null and params.sfyps != '' ">
+            AND eep.sfyps = #{params.sfyps}
+        </if>
+        <if test="params.sfypg !=null and params.sfypg != '' ">
+            AND eep.sfypg = #{params.sfypg}
+        </if>
+        <if test="params.createTime !=null and params.createTime != '' ">
+            AND eep.create_time = #{params.createTime}
+        </if>
+
+        <if test="params.beginCreateTime != null and params.beginCreateTime != '' ">
+            and eep.create_time &gt;= #{params.beginCreateTime}
+        </if>
+
+        <if test="params.endCreateTime != null and params.endCreateTime != '' ">
+            and eep.create_time &lt;= #{params.endCreateTime}
+        </if>
+        <if test="params.beginUpdateTime != null and params.beginUpdateTime != '' ">
+            and eep.update_time &gt;= #{params.beginUpdateTime}
+        </if>
+
+        <if test="params.endUpdateTime != null and params.endUpdateTime != '' ">
+            and eep.update_time &lt;= #{params.endUpdateTime}
+        </if>
+
+        <if test="params.reviewUser !=null and params.reviewUser!= ''">
+            AND find_in_set(#{params.reviewUser},eep.review_user)
+        </if>
+        <if test="params.assessUser !=null and params.assessUser!= ''">
+            AND find_in_set(#{params.assessUser},eep.assess_user)
+        </if>
+        ORDER BY eep.create_time desc
+    </select>
+
+    <select id="selectPage1" parameterType="Map" resultMap="emergencePlanQueryExtend">
+        SELECT
+        eep.*,ca.original_file_name
+        FROM  epm_plan  eep,c_attachment ca
+        where
+        eep.fjid=ca.id AND eep.delete_flag is  NULL
+    </select>
+
+
+
+    <select id="unReviewQueryList" parameterType="Map" resultMap="emergencePlanQueryExtend">
+        SELECT
+        eep.*,ca.original_file_name
+        FROM  epm_plan  eep,c_attachment ca,epm_plan_task ept
+        where
+        eep.fjid=ca.id AND eep.id=ept.yjyaid AND eep.delete_flag is  NULL
+        <if test="params.yjyabh !=null and params.yjyabh != '' ">
+            AND eep.yjyabh = #{params.yjyabh}
+        </if>
+        <if test="params.yjyamc !=null and params.yjyamc != '' ">
+            and eep.yjyamc like concat('%',#{params.yjyamc},'%')
+        </if>
+        <if test="params.yjlx !=null and params.yjlx != '' ">
+            AND eep.yjlx = #{params.yjlx}
+        </if>
+        <if test="params.yjxyjb !=null and params.yjxyjb != '' ">
+            AND eep.yjxyjb = #{params.yjxyjb}
+        </if>
+        <if test="params.yazt !=null and params.yazt != '' ">
+            AND eep.yazt = #{params.yazt}
+        </if>
+        <if test="params.status !=null and params.status != '' ">
+            AND eep.status = #{params.status}
+        </if>
+        <if test="params.deleteFlag !=null and params.deleteFlag != '' ">
+            AND eep.delete_flag = #{params.deleteFlag}
+        </if>
+        <if test="params.sfyps !=null and params.sfyps != '' ">
+            AND eep.sfyps = #{params.sfyps}
+        </if>
+        <if test="params.sfypg !=null and params.sfypg != '' ">
+            AND eep.sfypg = #{params.sfypg}
+        </if>
+        <if test="params.createTime !=null and params.createTime != '' ">
+            AND eep.create_time = #{params.createTime}
+        </if>
+        <if test="params.beginCreateTime != null and params.beginCreateTime != '' ">
+            and eep.create_time &gt;= #{params.beginCreateTime}
+        </if>
+
+        <if test="params.endCreateTime != null and params.endCreateTime != '' ">
+            and eep.create_time &lt;= #{params.endCreateTime}
+        </if>
+        <if test="params.beginUpdateTime != null and params.beginUpdateTime != '' ">
+            and eep.update_time &gt;= #{params.beginUpdateTime}
+        </if>
+
+        <if test="params.endUpdateTime != null and params.endUpdateTime != '' ">
+            and eep.update_time &lt;= #{params.endUpdateTime}
+        </if>
+        <if test="params.reviewUser !=null and params.reviewUser!= ''">
+            AND find_in_set(#{params.reviewUser},eep.review_user)
+        </if>
+        <if test="params.assessUser !=null and params.assessUser!= ''">
+            AND find_in_set(#{params.assessUser},eep.assess_user)
+        </if>
+        <if test="params.taskStatus !=null and params.taskStatus != '' ">
+            AND ept.status = #{params.taskStatus}
+        </if>
+        <if test="params.createTaskUser !=null and params.createTaskUser != '' ">
+            AND ept.create_user = #{params.createTaskUser}
+        </if>
+        <if test="params.updateTaskUser !=null and params.updateTaskUser != '' ">
+            AND ept.update_user = #{params.updateTaskUser}
+        </if>
+        <if test="params.rwmc !=null and params.rwmc != '' ">
+            AND ept.rwmc = #{params.rwmc}
+        </if>
+
+        ORDER BY eep.create_time desc
+
+    </select>
+
+
+
+
+       <!--首页代办-->
+    <select id="unHandleList" parameterType="Map" resultMap="emergencePlanQueryExtend">
+        select * from(
+        select
+        eep.*,ca.original_file_name,ept.update_user as updateUser,ept.rwmc
+        FROM  epm_plan  eep,c_attachment ca,epm_plan_task ept
+        where
+        eep.fjid=ca.id AND eep.id=ept.yjyaid AND eep.delete_flag is  NULL
+        and eep.sfyps='0' and eep.yazt='02' and eep.status='1' and ept.status='1' and ept.rwmc='review'
+        UNION ALL 
+        SELECT
+        eep.*,ca.original_file_name,ept.update_user as updateUser,ept.rwmc
+        FROM  epm_plan  eep,c_attachment ca,epm_plan_task ept
+        where
+        eep.fjid=ca.id AND eep.id=ept.yjyaid AND eep.delete_flag is  NULL
+        and eep.sfypg='0' and eep.yazt='03' and eep.status='1' and ept.status='1' and ept.rwmc='assess'
+
+        )M
+        <where>
+        <if test="params.yjyabh !=null and params.yjyabh != '' ">
+            AND M.yjyabh = #{params.yjyabh}
+        </if>
+        <if test="params.yjyamc !=null and params.yjyamc != '' ">
+            and M.yjyamc like concat('%',#{params.yjyamc},'%')
+        </if>
+        <if test="params.yjlx !=null and params.yjlx != '' ">
+            AND M.yjlx = #{params.yjlx}
+        </if>
+        <if test="params.yjxyjb !=null and params.yjxyjb != '' ">
+            AND M.yjxyjb = #{params.yjxyjb}
+        </if>
+        <if test="params.yazt !=null and params.yazt != '' ">
+            AND M.yazt = #{params.yazt}
+        </if>
+        <if test="params.status !=null and params.status != '' ">
+            AND M.status = #{params.status}
+        </if>
+        <if test="params.deleteFlag !=null and params.deleteFlag != '' ">
+            AND M.delete_flag = #{params.deleteFlag}
+        </if>
+        <if test="params.sfyps !=null and params.sfyps != '' ">
+            AND M.sfyps = #{params.sfyps}
+        </if>
+        <if test="params.sfypg !=null and params.sfypg != '' ">
+            AND M.sfypg = #{params.sfypg}
+        </if>
+        <if test="params.createTime !=null and params.createTime != '' ">
+            AND M.create_time = #{params.createTime}
+        </if>
+        <if test="params.beginCreateTime != null and params.beginCreateTime != '' ">
+            and M.create_time &gt;= #{params.beginCreateTime}
+        </if>
+
+        <if test="params.endCreateTime != null and params.endCreateTime != '' ">
+            and M.create_time &lt;= #{params.endCreateTime}
+        </if>
+        <if test="params.beginUpdateTime != null and params.beginUpdateTime != '' ">
+            and M.update_time &gt;= #{params.beginUpdateTime}
+        </if>
+
+        <if test="params.endUpdateTime != null and params.endUpdateTime != '' ">
+            and M.update_time &lt;= #{params.endUpdateTime}
+        </if>
+        <if test="params.reviewUser !=null and params.reviewUser!= ''">
+            AND find_in_set(#{params.reviewUser},M.review_user)
+        </if>
+        <if test="params.assessUser !=null and params.assessUser!= ''">
+            AND find_in_set(#{params.assessUser},M.assess_user)
+        </if>
+        <if test="params.taskStatus !=null and params.taskStatus != '' ">
+            AND M.status = #{params.taskStatus}
+        </if>
+        <if test="params.createTaskUser !=null and params.createTaskUser != '' ">
+            AND M.create_user = #{params.createTaskUser}
+        </if>
+        <if test="params.updateTaskUser !=null and params.updateTaskUser != '' ">
+            AND M.updateUser = #{params.updateTaskUser}
+        </if>
+        <if test="params.rwmc !=null and params.rwmc != '' ">
+            AND M.rwmc = #{params.rwmc}
+        </if>
+        </where>
+        ORDER BY M.create_time desc
+    </select>
+
+
+
+    <select id="findEmergencePlanById" parameterType="java.lang.String" resultMap="emergencePlanQueryExtend">
+        SELECT
+        eep.*,ca.original_file_name
+        FROM
+        epm_plan eep,c_attachment ca
+        WHERE
+        eep.fjid=ca.id AND eep.id= #{id,jdbcType=VARCHAR}
+    </select>
+
+
+    <update id="updateByIds">
+        update epm_plan set delete_flag='0' where id IN
+        <if test="ids != null">
+        <foreach item="item" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        </if>
+    </update>
+
+    <update id="updateById1" parameterType="cn.com.bmsoft.modules.epm.entity.EmergencePlanEntity">
+            update epm_plan eep
+            <set>
+                <if test="yjyabh !=null and yjyabh != '' ">
+                    eep.yjyabh = #{yjyabh},
+                </if>
+                <if test="yjyamc !=null and yjyamc != '' ">
+                   eep.yjyamc = #{yjyamc},
+                </if>
+                <if test="yjlx !=null and yjlx != '' ">
+                   eep.yjlx = #{yjlx},
+                </if>
+                <if test="yjxyjb !=null and yjxyjb != '' ">
+                  eep.yjxyjb = #{yjxyjb},
+                </if>
+                <if test="yazt !=null and yazt != '' ">
+                   eep.yazt = #{yazt},
+                </if>
+                <if test="status !=null and status != '' ">
+                    eep.status = #{status},
+                </if>
+                <if test="deleteFlag !=null and deleteFlag != '' ">
+                    AND eep.delete_flag = #{deleteFlag}
+                </if>
+                <if test="sfyps !=null and sfyps != '' ">
+                    eep.sfyps = #{sfyps},
+                </if>
+                <if test="sfypg !=null and sfypg != '' ">
+                   eep.sfypg = #{sfypg},
+                </if>
+                <if test="fjid !=null and fjid != '' ">
+                    eep.fjid = #{fjid},
+                </if>
+
+                <if test="reviewUser !=null and reviewUser!= ''">
+                    eep.review_user = #{reviewUser},
+                </if>
+                <if test="updateTime !=null">
+                    eep.update_time = #{updateTime,jdbcType=TIMESTAMP},
+                </if>
+                <if test="updateUser !=null and updateUser!= ''">
+                    eep.update_user = #{updateUser},
+                </if>
+                <if test="assessUser !=null and assessUser!= ''">
+                    eep.assess_user = #{assessUser}
+                </if>
+            </set>
+            where id = #{id,jdbcType=VARCHAR}
+        </update>
+
+</mapper>

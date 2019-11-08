@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.am.dao.RecordDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.am.entity.RecordEntity" id="recordMap">
+        <result property="id" column="id"/>
+        <result property="alarmRecordType" column="alarm_record_type"/>
+        <result property="alarmRecordCode" column="alarm_record_code"/>
+        <result property="resourceType" column="resource_type"/>
+        <result property="businessType" column="business_type"/>
+        <result property="alarmObject" column="alarm_object"/>
+        <result property="alarmTarget" column="alarm_target"/>
+        <result property="alarmGrade" column="alarm_grade"/>
+        <result property="alarmValue" column="alarm_value"/>
+        <result property="alarmTime" column="alarm_time"/>
+        <result property="networkType" column="network_type"/>
+        <result property="ipAddress" column="ip_address"/>
+        <result property="policeType" column="police_type"/>
+        <result property="handleTime" column="handle_time"/>
+        <result property="handleUserId" column="handle_user_id"/>
+        <result property="problemAnalysis" column="problem_analysis"/>
+        <result property="orderCode" column="order_code"/>
+        <result property="emailCode" column="email_code"/>
+        <result property="messageCode" column="message_code"/>
+        <result property="lastTime" column="last_time"/>
+        <result property="costTime" column="cost_time"/>
+        <result property="handleStatus" column="handle_status"/>
+        <result property="planSpeed" column="plan_speed"/>
+        <result property="alarmNoticeType" column="alarm_notice_type"/>
+        <result property="operationUserId" column="operation_user_id"/>
+        <result property="handlePlan" column="handle_plan"/>
+        <result property="handleResult" column="handle_result"/>
+        <result property="timeLimit" column="time_limit"/>
+        <result property="deleteFlag" column="delete_flag"/>
+
+    </resultMap>
+
+
+</mapper>

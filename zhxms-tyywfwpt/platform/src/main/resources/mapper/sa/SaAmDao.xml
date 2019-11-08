@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.sa.dao.SaAmDao">
+
+    <!--告警数量趋势统计-->
+    <select id="quantityTrendOfAlarm" parameterType="Map" resultType="Map">
+        SELECT
+            to_char(alarm_time, '${format}') AS `date`,
+            COUNT(*) AS `value`
+        FROM am_record
+        WHERE 1=1
+            <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                AND alarm_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        GROUP BY to_char(alarm_time, '${format}')
+        ORDER BY `date` ASC
+    </select>
+
+    <!--告警类型占比统计-->
+    <select id="proportionOfAlarmType" parameterType="Map" resultType="Map">
+        SELECT
+            (SELECT name FROM c_dictionary_item WHERE dict_code='gjlx' AND value=t1.gjlx) `name`,
+            `value`,
+            CONCAT(ROUND(t1.`value` / t2.`count` * 100, 0), '%') AS `percent`
+        FROM
+            (
+                SELECT
+                    alarm_record_type AS gjlx,
+                    COUNT(*) AS `value`
+                FROM am_record
+                WHERE 1=1
+                     <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                        AND alarm_time BETWEEN #{startTime} AND #{endTime}
+                     </if>
+                GROUP BY alarm_record_type
+             ) t1,
+            (
+                SELECT
+                    COUNT(*) AS `count`
+                 FROM am_record
+                 WHERE 1=1
+                     <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                        AND alarm_time BETWEEN #{startTime} AND #{endTime}
+                     </if>
+             ) t2
+    </select>
+
+    <!--排名前十的告警对象统计-->
+    <select id="alarmObjectOfTopTen" parameterType="Map" resultType="Map">
+        SELECT
+            t1.alarm_object AS `name`,
+            t1.`num`
+        FROM (
+            SELECT alarm_object, COUNT(*) AS `num`
+            FROM am_record
+            WHERE 1=1
+            <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                AND alarm_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+            GROUP BY alarm_object
+            ORDER BY `num`
+            DESC
+        ) t1 where rownum &lt;= 10
+    </select>
+
+    <!--排名前十的告警指标统计-->
+    <select id="alarmIndexOfTopTen" parameterType="Map" resultType="Map">
+        SELECT
+            t1.alarm_target AS `name`,
+            t1.`num`
+        FROM (
+            SELECT alarm_target, COUNT(*) AS `num`
+            FROM am_record
+            WHERE 1=1
+            <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                AND alarm_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+            GROUP BY alarm_target
+            ORDER BY `num`
+            DESC LIMIT 0,10
+        ) t1
+    </select>
+
+    <!--告警等级分布情况统计-->
+    <select id="distributionOfAlarmLevel" parameterType="Map" resultType="Map">
+        SELECT
+            to_char(alarm_time, '${format}') `date`,
+            SUM(
+                IF(
+                    alarm_grade = '1',
+                    1,
+                    0
+                )
+            ) AS `level1`,
+            SUM(
+                IF(
+                    alarm_grade = '2',
+                    1,
+                    0
+                )
+            ) AS `level2`,
+            SUM(
+                IF(
+                    alarm_grade = '3',
+                    1,
+                    0
+                )
+            ) AS `level3`,
+            SUM(
+                IF(
+                    alarm_grade = '4',
+                    1,
+                    0
+                )
+            ) AS `level4`
+        FROM am_record
+        WHERE 1=1
+            <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                AND alarm_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        GROUP BY to_char(alarm_time, '${format}')
+        ORDER BY `date` ASC
+    </select>
+
+    <!--备份异常情况统计-->
+    <select id="backupExceptionSa" parameterType="Map" resultType="Map">
+        SELECT
+        to_char(cjsj, '${format}') AS `date`,
+            COUNT(*) AS `value`
+        FROM bm_check_log
+        WHERE 1=1
+            <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                AND cjsj BETWEEN #{startTime} AND #{endTime}
+            </if>
+        GROUP BY to_char(cjsj, '${format}')
+        ORDER BY `date` ASC
+    </select>
+
+    <select id="alarmSa" parameterType="Map" resultType="Map">
+        select t.`alarm_count`, t3.`solve_rate`
+        FROM
+            (-- 工单统计数
+                SELECT
+                    COUNT( * ) AS `alarm_count`
+                FROM
+                    am_record
+                WHERE 1=1 and
+                    alarm_time between #{startTime} and #{endTime}
+            ) t,
+            (
+            -- 工单解决率
+            SELECT
+                ROUND(((t1.last_month_solve_count)/t2.last_month_count) * 100, 0)
+                AS `solve_rate`
+            FROM
+                (
+                    SELECT
+                        COUNT( * ) AS last_month_solve_count
+                    FROM
+                        am_record
+                    WHERE 1=1 and
+                        alarm_time between #{startTime} and #{endTime}
+                        AND handle_result = '0'
+                ) t1,
+                (
+                    SELECT
+                        COUNT( * ) AS last_month_count
+                    FROM
+                        am_record
+                    WHERE 1=1 and
+                        alarm_time between #{startTime} and #{endTime}
+                ) t2
+            ) t3
+    </select>
+
+</mapper>

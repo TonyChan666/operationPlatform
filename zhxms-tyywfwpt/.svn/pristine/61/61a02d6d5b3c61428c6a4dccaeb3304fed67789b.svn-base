@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.rm.dao.DeploymentInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.rm.entity.DeploymentInfoEntity" id="DeploymentInfoMap">
+        <result property="id" column="id"/>
+        <result property="zyid" column="zyid"/>
+        <result property="fwqid" column="fwqid"/>
+        <result property="azwz" column="azwz"/>
+        <result property="bbh" column="bbh"/>
+        <result property="zybm" column="zybm"/>
+        <result property="cjrid" column="cjrid"/>
+        <result property="cjsj" column="cjsj"/>
+        <result property="xgrid" column="xgrid"/>
+        <result property="xgsj" column="xgsj"/>
+    </resultMap>
+
+    <insert id="saveDeploymentInfos" parameterType="java.util.List">
+        insert into rm_deployment_info(zyid,fwqid,azwz,bbh,cjrid,cjsj,zybm) values
+        <foreach collection="list" index="index" item="item" open="" separator="," close="">
+            (#{item.zyid},#{item.fwqid},#{item.azwz},#{item.bbh},#{item.cjrid},#{item.cjsj},#{item.zybm})
+        </foreach>
+    </insert>
+
+    <delete id="removeDeploymentInfos" parameterType="String">
+        delete from rm_deployment_info where zybm = #{tableName} and zyid = #{zyid}
+    </delete>
+    <select id="serverList" parameterType="Integer" resultType="cn.com.bmsoft.modules.rm.entity.DeploymentInfoEntity">
+        select
+            t2.* ,
+             (select t.sbmc from rm_server t where t.id = t2.fwqid) azfwq
+            from rm_deployment_info t2
+        where t2.zybm ='bsm_service' and t2.zyid = #{id}
+    </select>
+    <select id="systemlList" parameterType="Integer" resultType="cn.com.bmsoft.modules.rm.entity.DeploymentInfoEntity">
+        select
+            t2.* ,
+             (select t.sbmc from rm_server t where t.id = t2.fwqid) azfwq
+            from rm_deployment_info t2
+        where t2.zybm ='bsm_system' and t2.zyid = #{id}
+    </select>
+    <delete id="deleteSystems" >
+        delete from rm_deployment_info  where zybm = "bsm_system" and zyid
+        in
+        <foreach item="ids" collection="array" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+    <delete id="deleteServices" >
+        delete from rm_deployment_info  where zybm = "bsm_service" and zyid
+        in
+        <foreach item="ids" collection="array" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.rm.dao.RmResourceDeptDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.rm.entity.RmResourceDeptEntity" id="rmResourceDeptMap">
+        <result property="id" column="id"/>
+        <result property="zyid" column="zyid"/>
+        <result property="ywzid" column="ywzid"/>
+        <result property="zybm" column="zybm"/>
+    </resultMap>
+
+    <insert id="saveResourceDepts" parameterType="java.util.List">
+        insert into rm_resource_dept(zyid,ywzid,zybm) values
+        <foreach collection="list" index="index" item="item" open="" separator="," close="">
+            (#{item.zyid},#{item.ywzid},#{item.zybm})
+        </foreach>
+    </insert>
+
+    <delete id="removeResourceDepts" parameterType="String">
+        delete from rm_resource_dept where zybm = #{tableName} and zyid = #{zyid}
+    </delete>
+
+    <select id="getResourceDeptNames" parameterType="String" resultType="java.util.Map">
+        select dept_id,dept_name from sys_dept where dept_id in (select ywzid from rm_resource_dept where zybm = #{tableName} and zyid = #{zyid})
+    </select>
+
+
+</mapper>

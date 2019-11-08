@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.sa.dao.SaRmBsmDao">
+
+    <!--服务器资源统计分页列表-->
+    <select id="pageServerResourceStatistic" parameterType="Map" resultType="Map">
+        SELECT
+            fwqid,
+            fwqmc,
+            wllb,
+            (SELECT `name` FROM c_dictionary_item WHERE dict_code = 'wllb' AND `value` = wllb) wllbmc,
+            ip,
+            ywryid,
+            (SELECT `name` FROM sys_user WHERE user_id = ywryid) AS ywrymc,
+            container_sl,
+            storage_sl,
+            component_sl,
+            link_sl
+        FROM
+        (
+            SELECT
+                fwqid,
+                (SELECT sbmc FROM rm_server WHERE id = fwqid) AS fwqmc,
+                (SELECT wllb FROM rm_server WHERE id = fwqid) AS wllb,
+                (SELECT ip FROM rm_server WHERE id = fwqid) AS ip,
+                (SELECT ywryid FROM rm_server WHERE id = fwqid) AS ywryid,
+                SUM(
+                    IF(
+                        zybm='rm_container',
+                        1,
+                        0
+                    )
+                ) AS container_sl,
+                SUM(
+                    IF(
+                        zybm='rm_storage',
+                        1,
+                        0
+                    )
+                ) AS storage_sl,
+                SUM(
+                    IF(
+                        zybm='rm_component',
+                        1,
+                        0
+                    )
+                ) AS component_sl,
+                SUM(
+                    IF(
+                        zybm='rm_link',
+                        1,
+                        0
+                    )
+                ) AS link_sl
+            FROM `rm_deployment_info`
+            GROUP BY fwqid
+        ) t
+        WHERE 1=1
+        <if test="fwqmc != null and fwqmc !=''">
+            AND fwqmc LIKE '%#{fwqmc}%'
+        </if>
+        <if test="ip != null and ip !=''">
+            AND ip LIKE '%#{ip}%'
+        </if>
+        <if test="wllb != null and wllb !=''">
+            AND wllb = #{wllb}
+        </if>
+        <if test="ywryid != null and ywryid !=''">
+            AND ywryid = #{ywryid}
+        </if>
+    </select>
+
+    <!--资源业务服务信息分页列表-->
+    <select id="pageBusinessServiceInfo" parameterType="Map" resultType="Map">
+        SELECT
+            id,
+            ywfwbm,
+            ywfwmc,
+            bbh,
+            url,
+            (SELECT `name` FROM sys_user WHERE user_id = ywryid) AS ywrymc,
+            (SELECT `name` FROM c_dictionary_item WHERE dict_code = 'jkxy' AND `value` = jkxy) AS jkxymc,
+            (SELECT `name` FROM c_dictionary_item WHERE dict_code = 'ywjz' AND `value` = ywjz) AS ywjzmc,
+            (SELECT `name` FROM c_dictionary_item WHERE dict_code = 'ywks' AND `value` = ywks) AS ywksmc
+        FROM bsm_service
+        WHERE id IN (
+            SELECT
+                zyid
+            FROM rm_deployment_info
+            WHERE zybm = 'bsm_service' AND fwqid = #{fwqid}
+        )
+    </select>
+
+    <!--资源容器信息分页列表-->
+    <select id="pageContainerInfo" parameterType="Map" resultType="Map">
+        SELECT
+            t1.id,
+            t1.rqbm,
+            t1.rqmc,
+            t2.azwz,
+            t2.bbh,
+            (SELECT `name` FROM sys_user WHERE user_id = t1.ywryid) AS ywrymc,
+            (SELECT `name` FROM c_dictionary_item WHERE dict_code = 'ywjz' AND `value` = t1.ywjz) AS ywjzmc
+        FROM rm_container t1
+        LEFT JOIN rm_deployment_info t2
+        ON t1.id = t2.zyid
+        WHERE t2.zybm = 'rm_container' AND t2.fwqid = #{fwqid}
+    </select>
+
+    <!--资源组件信息分页列表-->
+    <select id="pageComponentInfo" parameterType="Map" resultType="Map">
+        SELECT
+            t1.id,
+            t1.zjbh,
+            t1.zjmc,
+            t2.azwz,
+            t2.bbh,
+            (SELECT `name` FROM sys_user WHERE user_id = t1.ywryid) AS ywrymc,
+            (SELECT `name` FROM c_dictionary_item WHERE dict_code = 'ywjz' AND `value` = t1.ywjz) AS ywjzmc
+        FROM rm_component t1
+        LEFT JOIN rm_deployment_info t2
+        ON t1.id = t2.zyid
+        WHERE t2.zybm = 'rm_component' AND t2.fwqid = #{fwqid}
+    </select>
+
+    <!--资源存储信息分页列表-->
+    <select id="pageStorageInfo" parameterType="Map" resultType="Map">
+        SELECT
+            t1.id,
+            t1.ccbh,
+            t1.ccmc,
+            t2.azwz,
+            t2.bbh,
+            (SELECT `name` FROM sys_user WHERE user_id = t1.ywryid) AS ywrymc,
+            (SELECT `name` FROM c_dictionary_item WHERE dict_code = 'ywjz' AND `value` = t1.ywjz) AS ywjzmc
+        FROM rm_storage t1
+        LEFT JOIN rm_deployment_info t2
+        ON t1.id = t2.zyid
+        WHERE t2.zybm = 'rm_storage' AND t2.fwqid = #{fwqid}
+    </select>
+
+    <!--资源链路信息分页列表-->
+    <select id="pageLinkInfo" parameterType="Map" resultType="Map">
+        SELECT
+            t1.id,
+            t1.llbm,
+            t1.llmc,
+            t2.azwz,
+            t2.bbh,
+            (SELECT `name` FROM sys_user WHERE user_id = t1.ywryid) AS ywrymc
+        FROM rm_link t1
+        LEFT JOIN rm_deployment_info t2
+        ON t1.id = t2.zyid
+        WHERE t2.zybm = 'rm_link' AND t2.fwqid = #{fwqid}
+    </select>
+</mapper>

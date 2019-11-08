@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.am.dao.IndexStatisticsDao">
+
+    <!--工单数量趋势统计-->
+    <select id="queryTrendOrderCount" parameterType="Map" resultType="Map">
+        select
+        TO_CHAR(t1.statisticsDate, 'MM.DD') `statisticsDate`,
+        IFNULL(t2.createOrderCount,0) `createOrderCount`,
+        IFNULL(t3.handleOrderCount,0) `handleOrderCount`
+        from
+        (
+        SELECT DISTINCT
+
+        TIMESTAMPADD(DAY, id, #{startDate}) statisticsDate
+        FROM
+        sys_log
+        WHERE
+        TIMESTAMPADD ( DAY, id , #{startDate} ) &lt;= #{endDate}
+        ORDER BY
+        'statisticsDate'
+        ) t1
+        LEFT JOIN
+        (
+        select count(*) as createOrderCount, TO_CHAR(cjsj, 'YYYY-MM-DD') createDate
+        from wom_information
+        where 1=1
+        and gdzt!='5'
+        and cjrid=#{userId}
+        GROUP BY TO_CHAR(cjsj, 'YYYY-MM-DD')
+
+        ) t2
+        on t1.statisticsDate=t2.createDate
+        LEFT JOIN
+        (
+        select count(*) as handleOrderCount, TO_CHAR(cjsj, 'YYYY-MM-DD') createDate
+        from wom_handle_information
+        where 1=1
+        and gdclzt='1'
+        and cjrid=#{userId}
+        GROUP BY TO_CHAR(cjsj, 'YYYY-MM-DD')
+        ) t3
+        on t1.statisticsDate=t3.createDate
+        ORDER BY t1.statisticsDate ASC
+    </select>
+  
+  <!--资源占比统计统计-->
+  <select id="queryResourcePercent" parameterType="Map" resultType="Map">
+     select '服务器' as `resourceName`, count(*) `resourceCount` from rm_server  where delete_flag is null and   ywryid=#{useId}
+     UNION
+     select '网络设备' as `resourceName`, count(*) `resourceCount` from rm_network_device  where delete_flag is null and   ywryid=#{useId}
+     UNION
+     select '链路' as `resourceName`, count(*) `resourceCount` from rm_link_device  where delete_flag is null and   ywryid=#{useId}
+     UNION
+     select '容器' as `resourceName`, count(*) `resourceCount` from rm_container  where delete_flag is null and   ywryid=#{useId}
+     UNION
+     select '存储资源' as `resourceName`, count(*) `resourceCount` from rm_storage  where delete_flag is null and   ywryid=#{useId}
+     UNION
+     select '组件' as `resourceName`, count(*) `resourceCount` from rm_component  where delete_flag is null and   ywryid=#{useId}
+     UNION
+     select '探针' as `resourceName`, count(*) `resourceCount` from rm_probe  where delete_flag is null and   ywryid=#{useId}
+     
+  </select>
+  
+  
+   
+  <!--按用户ID查询登记的资源总数-->
+  <select id="queryResourceByUserId" parameterType="Map" resultType="Integer">
+     select sum(`resourceCount`)  from
+       (
+        select  count(*) `resourceCount` from rm_server  where delete_flag is null and   ywryid=#{useId}
+        UNION
+        select  count(*) `resourceCount` from rm_network_device  where delete_flag is null and   ywryid=#{useId}
+        UNION
+        select  count(*) `resourceCount` from rm_link_device  where delete_flag is null and   ywryid=#{useId}
+        UNION
+        select  count(*) `resourceCount` from rm_container  where delete_flag is null and   ywryid=#{useId}
+        UNION
+        select  count(*) `resourceCount` from rm_storage  where delete_flag is null and   ywryid=#{useId}
+        UNION
+        select  count(*) `resourceCount` from rm_component  where delete_flag is null and   ywryid=#{useId}
+        UNION
+        select  count(*) `resourceCount` from rm_probe  where delete_flag is null and   ywryid=#{useId}
+       )
+    as table1
+     
+  </select>
+  
+  <!--按用户ID查询未解决的告警记录数量-->
+  <select id="queryAlarmCountByUserId" parameterType="Map" resultType="Integer">
+    select count(*) alarmCount from am_record 
+    where handle_result is null and delete_flag is null 
+    and alarm_object in 
+     (
+       select `resourceCode`  from
+       (
+          select  fwqbm `resourceCode` from rm_server  where delete_flag is null and   ywryid=#{useId}
+          UNION
+          select  sbbh `resourceCode` from rm_network_device  where delete_flag is null and   ywryid=#{useId}
+          UNION
+          select  llid `resourceCode` from rm_link_device  where delete_flag is null and   ywryid=#{useId}
+          UNION
+          select  rqbm `resourceCode` from rm_container  where delete_flag is null and   ywryid=#{useId}
+          UNION
+          select  ccbh `resourceCode` from rm_storage  where delete_flag is null and   ywryid=#{useId}
+          UNION
+          select  zjbh `resourceCode` from rm_component  where delete_flag is null and   ywryid=#{useId}
+          UNION
+          select  tzbh `resourceCode` from rm_probe  where delete_flag is null and   ywryid=#{useId}
+         )
+       as table1  
+      )
+      
+  </select>
+      
+  <!--按用户ID查询未解决的告警记录数量-->
+  <select id="queryOrderCountByUserId" parameterType="Map" resultType="Integer">
+    select count(*) orderCount from wom_information 
+    where gdzt !=5 and delete_flag is null 
+    and slid in 
+     (
+       select `resourceCode`  from
+       (
+          select  fwqbm `resourceCode` from rm_server  where delete_flag is null and   ywryid=#{useId}
+          UNION
+          select  sbbh `resourceCode` from rm_network_device  where delete_flag is null and   ywryid=#{useId}
+          UNION
+          select  llid `resourceCode` from rm_link_device  where delete_flag is null and   ywryid=#{useId}
+          UNION
+          select  rqbm `resourceCode` from rm_container  where delete_flag is null and   ywryid=#{useId}
+          UNION
+          select  ccbh `resourceCode` from rm_storage  where delete_flag is null and   ywryid=#{useId}
+          UNION
+          select  zjbh `resourceCode` from rm_component  where delete_flag is null and   ywryid=#{useId}
+          UNION
+          select  tzbh `resourceCode` from rm_probe  where delete_flag is null and   ywryid=#{useId}
+         )
+       as table1  
+      )
+    
+     
+  </select>
+  
+</mapper>

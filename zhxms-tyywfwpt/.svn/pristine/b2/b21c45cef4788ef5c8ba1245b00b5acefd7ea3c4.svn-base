@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.wom.dao.InformationDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.wom.entity.InformationEntity" id="informationMap">
+        <result property="id" column="id"/>
+        <result property="gdbh" column="gdbh"/>
+        <result property="gdbt" column="gdbt"/>
+        <result property="slid" column="slid"/>
+        <result property="yxj" column="yxj"/>
+        <result property="gjdj" column="gjdj"/>
+        <result property="gdlx" column="gdlx"/>
+        <result property="gdssfwid" column="gdssfwid"/>
+        <result property="gdssfwmc" column="gdssfwmc"/>
+        <result property="gdbsnr" column="gdbsnr"/>
+        <result property="gdzt" column="gdzt"/>
+        <result property="fjid" column="fjid"/>
+        <result property="sftj" column="sftj"/>
+        <result property="cjrid" column="cjrid"/>
+        <result property="cjsj" column="cjsj"/>
+        <result property="xgrid" column="xgrid"/>
+        <result property="xgsj" column="xgsj"/>
+        <result property="sfyx" column="sfyx"/>
+        <result property="delete_flag" column="delete_flag"/>
+    </resultMap>
+    <!--首页工单列表-->
+    <select id="home" parameterType="map" resultType="map">
+        select
+        wi.id as `id`,
+        wi.slid as `slid`,
+        wi.gdbh as `gdbh`,
+        wi.gdbt as `gdbt`,
+        wp.blsx as `blsx`,
+        wi.xgsj as `xgsj`,
+        min(wp.cjsj) as `pfsj`,
+        (select t.name from GDGA_TYYW.sys_user t where t.user_id = wi.xgrid) as `xgrid`,
+        (select t.name from GDGA_TYYW.c_dictionary_item t where t.dict_code='gdyxj' and t.value=wi.yxj) as `yxj`,
+        (select t.name from GDGA_TYYW.c_dictionary_item t where t.dict_code='gdlx' and t.value=wi.gdlx) as `gdlx`,
+        (select t.name from GDGA_TYYW.c_dictionary_item t where t.dict_code='gdzt' and t.value=wi.gdzt) as `gdzt`
+        from
+        GDGA_TYYW.wom_information wi
+        left join
+        GDGA_TYYW.wom_process wp
+        on
+        wi.gdbh = wp.gdbh
+        where
+        wi.gdzt != '6'
+        and wi.ywryid = #{params.ywryid}
+        and wp.blsx is not null
+        and wi.delete_flag is null
+        <if test="params.gdbt != null and params.gdbt != '' ">
+            and wi.gdbt  like concat('%',#{params.gdbt},'%')
+        </if>
+        <if test="params.gdlx != null and params.gdlx != '' ">
+            and wi.gdlx like concat('%',#{params.gdlx},'%')
+        </if>
+        <if test="params.gdzt != null and params.gdzt != '' ">
+            and wi.gdzt like concat('%',#{params.gdzt},'%')
+        </if>
+        <if test="params.pfr != null and params.pfr != '' ">
+            and wp.cjrid like concat('%',#{params.cjrid},'%')
+        </if>
+        <if test="params.yxj != null and params.yxj != '' ">
+            and wi.yxj like concat('%',#{params.yxj},'%')
+        </if>
+        <if test="params.startTime != null and params.startTime != ''">
+            and wp.cjsj >= date_format(#{params.startTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            and wp.cjsj &lt;= date_format(#{params.endTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        group by
+        wi.gdbh ,wi.id,wi.slid ,wi.gdbt,wi.gdbt,wp.blsx,wi.xgsj,wi.yxj,wi.xgrid,wi.gdlx,wi.gdzt
+        ORDER BY wi.xgsj  DESC
+    </select>
+    <!--获取待处理列表-->
+    <select id="getDaiChuLiList" parameterType="map" resultType="map">
+        select wi.id as `id`, wi.slid as `slid` ,wi.gdbh as `gdbh`,wi.gdbt as `gdbt`,wp.blsx as `blsx`,wi.xgsj as `xgsh`,min(wp.cjsj) as `pfsj`,
+        (select t.name  from sys_user t where t.user_id = wi.xgrid)as `xgrid`,
+        (select t.name from c_dictionary_item t where t.dict_code='gdyxj' and t.value=wi.yxj) as `yxj`,
+        (select t.name from c_dictionary_item t where t.dict_code='gdlx' and t.value=wi.gdlx) as `gdlx`,
+        (select t.name from c_dictionary_item t where t.dict_code='gdzt' and t.value=wi.gdzt) as `gdzt`
+        from wom_information wi left join  wom_process wp on wi.gdbh = wp.gdbh
+        where wi.gdzt='2' and wi.delete_flag is null group by wi.gdbh
+        and wi.slid in
+        <foreach item="slid" collection="list" open="(" separator="," close=")">
+            #{slid}
+        </foreach>
+        <if test="params.gdbt != null and params.gdbt != '' ">
+            and wi.gdbt  like concat('%',#{params.gdbt},'%')
+        </if>
+        <if test="params.gdlx != null and params.gdlx != '' ">
+            and wi.gdlx like concat('%',#{params.gdlx},'%')
+        </if>
+        <if test="params.gdzt != null and params.gdzt != '' ">
+            and wi.gdzt like concat('%',#{params.gdzt},'%')
+        </if>
+        <if test="params.pfr != null and params.pfr != '' ">
+            and wp.cjrid like concat('%',#{params.cjrid},'%')
+                    </if>
+        <if test="params.yxj != null and params.yxj != '' ">
+            and wi.yxj like concat('%',#{params.yxj},'%')
+        </if>
+        <if test="params.startTime != null and params.startTime != ''">
+            and wp.cjsj >= date_format(#{params.startTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            and wp.cjsj &lt;= date_format(#{params.endTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+    </select>
+    <!--获取待派发列表-->
+    <select id="getDaiPaiFaPageList" parameterType="map" resultType="map">
+        select wi.id as `id`, wi.slid as `slid`,wi.gdbh as `gdbh`,wi.gdbt as `gdbt`,wi.cjsj as `cjsj` ,
+        (select t.name from c_dictionary_item t where t.dict_code='gdyxj' and t.value=wi.yxj) as `yxj`,
+        (select t.name from c_dictionary_item t where t.dict_code='gdlx' and t.value=wi.gdlx) as `gdlx`
+        from wom_information wi  where wi.gdzt='1'and wi.delete_flag is null
+        <if test="params.gdbt != null and params.gdbt != '' ">
+            and wi.gdbt like concat('%',#{params.gdbt},'%')
+        </if>
+        <if test="params.gdlx != null and params.gdlx != '' ">
+            and gdlx like concat('%',#{params.gdlx},'%')
+        </if>
+        <if test="params.gdzt != null and params.gdzt != '' ">
+            and gdzt like concat('%',#{params.gdzt},'%')
+        </if>
+        <if test="params.yxj != null and params.yxj != '' ">
+            and yxj like concat('%',#{params.yxj},'%')
+        </if>
+        <if test="params.startTime != null and params.startTime != ''">
+            and wi.cjsj >= date_format(#{params.startTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            and wi.cjsj &lt;= date_format(#{params.endTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        ORDER BY wi.cjsj  DESC
+    </select>
+    <!--工单创建信息查询-->
+    <select id="getInformationById" parameterType="Integer" resultType="cn.com.bmsoft.modules.wom.entity.InformationEntity">
+       SELECT
+        t2.id,
+        t2.gdbh,
+        t2.gdbt,
+        t2.slid,
+        t2.gdssfwid,
+        t2.gdssfwmc,
+        t2.gdbsnr,
+        t2.fjid,
+        t2.gdlx,
+        t2.gdzt,
+        t2.yxj,
+        t2.cjrid,
+        t2.ywryid,
+	( SELECT t.original_file_name FROM c_attachment t WHERE t.id = t2.fjid ) fjmc,
+	( SELECT t.NAME FROM c_dictionary_item t WHERE t.dict_code = 'gdlx' AND t.VALUE = t2.gdlx ) gdlxmc,
+	( SELECT t.NAME FROM c_dictionary_item t WHERE t.dict_code = 'gdzt' AND t.VALUE = t2.gdzt ) gdztmc,
+	( SELECT t.NAME FROM c_dictionary_item t WHERE t.dict_code = 'gdyxj' AND t.VALUE = t2.yxj ) yxjmc
+    FROM
+	wom_information t2
+	 where t2.id = #{id} and t2.delete_flag is null
+    </select>
+    <!--待审核工单列表-->
+    <select id="getdaiShengHePageList" parameterType="map" resultType="map">
+
+        select wi.id as `id`, wi.slid as `slid`, wi.gdbh as `gdbh`,wi.gdbt as `gdbt`,wp.blsx as `blsx`,wi.xgsj as
+        `xgsj`,min(wp.cjsj) as `pfsj`,
+        (select t.name from sys_user t where t.user_id = wi.xgrid)as `xgrid`,
+        (select t.name from c_dictionary_item t where t.dict_code='gdlx' and t.value=wi.gdlx)as `gdlx`,
+        (select t.name from c_dictionary_item t where t.dict_code='gdzt' and t.value=wi.gdzt) as `gdzt`
+        from wom_information wi left join wom_process wp on wi.gdbh = wp.gdbh where wi.gdzt='3'
+        and wi.delete_flag is null AND  wp.blsx IS  not NULL
+        <if test="params.gdbt != null and params.gdbt != '' ">
+            and wi.gdbt like concat('%',#{params.gdbt},'%')
+        </if>
+        <if test="params.gdlx != null and params.gdlx != '' ">
+            and gdlx like concat('%',#{params.gdlx},'%')
+        </if>
+        <if test="params.gdzt != null and params.gdzt != '' ">
+            and gdzt like concat('%',#{params.gdzt},'%')
+        </if>
+        <if test="params.xgrid != null and params.xgrid != '' ">
+            and wi.xgrid like concat('%',#{params.xgrid},'%')
+        </if>
+        <if test="params.yxj != null and params.yxj != '' ">
+            and wi.yxj like concat('%',#{params.yxj},'%')
+        </if>
+        <if test="params.startTime != null and params.startTime != ''">
+            and wi.xgsj >= date_format(#{params.startTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            and wi.xgsj &lt;= date_format(#{params.endTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        group by wi.gdbh, wi.id, wi.slid , wi.gdbt,wp.blsx,wi.xgsj,wi.xgrid,wi.gdlx,wi.gdzt
+        ORDER BY wi.xgsj DESC
+    </select>
+    <!--待办结工单列表-->
+    <select id="getDaiBanJiePageList" parameterType="map" resultType="map">
+        select wi.id as `id`,wi.slid as `slid` , wi.gdbh as `gdbh`,wi.gdbt as `gdbt`,wp.blsx as `blsx`,wi.xgsj as
+        `xgsj`,min(wp.cjsj) as `pfsj`,
+        (select t.name from sys_user t where t.user_id = wi.xgrid)as `xgrid`,
+        (select t.name from c_dictionary_item t where t.dict_code='gdyxj' and t.value=wi.yxj) as `yxj`,
+        (select t.name from c_dictionary_item t where t.dict_code='gdlx' and t.value=wi.gdlx) as `gdlx`,
+        (select t.name from c_dictionary_item t where t.dict_code='gdzt' and t.value=wi.gdzt) as `gdzt`
+        from wom_information wi left join wom_process wp on wi.gdbh = wp.gdbh where wi.gdzt='4'
+        and wi.delete_flag is null AND wp.blsx is not null
+        <if test="params.gdbt != null and params.gdbt != '' ">
+            and wi.gdbt like concat('%',#{params.gdbt},'%')
+        </if>
+        <if test="params.gdlx != null and params.gdlx != '' ">
+            and gdlx like concat('%',#{params.gdlx},'%')
+        </if>
+        <if test="params.gdzt != null and params.gdzt != '' ">
+            and gdzt like concat('%',#{params.gdzt},'%')
+        </if>
+        <if test="params.xgrid != null and params.xgrid != '' ">
+            and wi.xgrid like concat('%',#{params.xgrid},'%')
+        </if>
+        <if test="params.yxj != null and params.yxj != '' ">
+            and yxj like concat('%',#{params.yxj},'%')
+        </if>
+        <if test="params.startTime != null and params.startTime != ''">
+            and wi.xgsj >= date_format(#{params.startTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            and wi.xgsj &lt;= date_format(#{params.endTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        group by wi.gdbt, wi.id, wi.slid , wi.gdbh,wp.blsx,wi.xgsj,wi.yxj,wi.xgrid,wi.gdlx,wi.gdzt
+        ORDER BY wi.xgsj DESC
+    </select>
+
+
+
+    <!--告警列表-->
+    <select id="warnList" parameterType="map" resultType="map">
+        select
+        w.id as `id`,
+        w.gdbt as `gdbt`,
+        w.gdbh as `gdbh`,
+        w.cjsj as `cjsj`,
+        (select t.name from c_dictionary_item t where t.dict_code='gjdj' and t.value=a.alarm_grade) as `gjdj`,
+        (select t.name from c_dictionary_item t where t.dict_code='gdlx' and t.value=w.gdlx) as `gdlx`,
+        (select t.name from c_dictionary_item t where t.dict_code='gdzt' and t.value=w.gdzt) as `gdzt`
+        from am_record a left JOIN wom_information w on a.order_code = w.id where w.delete_flag is null and (w.gdlx='1'or w.gdlx='2'or w.gdlx='3')
+        <if test="params.gdbt != null and params.gdbt != '' ">
+            and w.gdbt like concat('%',#{params.gdbt},'%')
+        </if>
+        <if test="params.gdlx != null and params.gdlx != '' ">
+            and gdlx like concat('%',#{params.gdlx},'%')
+        </if>
+        <if test="params.gdzt != null and params.gdzt != '' ">
+            and gdzt like concat('%',#{params.gdzt},'%')
+        </if>
+
+        <if test="params.startTime != null and params.startTime != ''">
+            and w.cjsj >= date_format(#{params.startTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            and w.cjsj &lt;= date_format(#{params.endTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+    </select>
+    <!--工单管理-运维组长信息列表-->
+    <select id="ywzzList" parameterType="map" resultType="cn.com.bmsoft.modules.wom.entity.InformationEntity">
+        select t.* from (
+        SELECT id,gdbh,gdbt,slid,yxj,gdlx,gdssfwid,gdssfwmc,gdbsnr,gdzt,fjid,sftj,cjrid,cjsj,xgrid,xgsj,sfyx,delete_flag,ywryid
+        FROM wom_information WHERE ywryid = #{params.ywryid} OR ywryid is null OR cjrid = #{params.cjrid}) t
+        where
+        t.delete_flag IS NULL
+        <if test="params.cjrids != null and params.cjrids.size()>0 ">
+            and t.cjrid IN
+            <foreach item="cjrid" collection="params.cjrids" open="(" separator="," close=")">
+                #{cjrid}
+            </foreach>
+        </if>
+        <if test="params.gdbt != null and params.gdbt != '' ">
+            and t.gdbt like concat('%',#{params.gdbt},'%')
+        </if>
+        <if test="params.gdlx != null and params.gdlx != '' ">
+            and t.gdlx like concat('%',#{params.gdlx},'%')
+        </if>
+        <if test="params.yxj != null and params.yxj != '' ">
+            and t.yxj like concat('%',#{params.yxj},'%')
+        </if>
+        <if test="params.gdzt != null and params.gdzt != '' ">
+            and t.gdzt like concat('%',#{params.gdzt},'%')
+        </if>
+        <if test="params.gdzt != null and params.gdzt != '' ">
+            and t.gdzt like concat('%',#{params.gdzt},'%')
+        </if>
+
+        <if test="params.startTime != null and params.startTime != ''">
+            and t.cjsj >= date_format(#{params.startTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            and t.cjsj &lt;= date_format(#{params.endTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        ORDER BY t.cjsj DESC
+    </select>
+    <!--工单管理-普通运维人员信息列表-->
+    <select id="ptywryList" parameterType="map" resultType="cn.com.bmsoft.modules.wom.entity.InformationEntity">
+        select t.* from (
+        SELECT id,gdbh,gdbt,slid,yxj,gdlx,gdssfwid,gdssfwmc,gdbsnr,gdzt,fjid,sftj,cjrid,cjsj,xgrid,xgsj,sfyx,delete_flag,ywryid
+        FROM wom_information WHERE ywryid = #{params.ywryid}) t
+        where
+        t.delete_flag IS NULL
+        <if test="params.cjrids != null and params.cjrids.size()>0 ">
+            and t.cjrid IN
+            <foreach item="cjrid" collection="params.cjrids" open="(" separator="," close=")">
+                #{cjrid}
+            </foreach>
+        </if>
+        <if test="params.gdbt != null and params.gdbt != '' ">
+            and t.gdbt like concat('%',#{params.gdbt},'%')
+        </if>
+        <if test="params.gdlx != null and params.gdlx != '' ">
+            and t.gdlx like concat('%',#{params.gdlx},'%')
+        </if>
+        <if test="params.yxj != null and params.yxj != '' ">
+            and t.yxj like concat('%',#{params.yxj},'%')
+        </if>
+        <if test="params.gdzt != null and params.gdzt != '' ">
+            and t.gdzt like concat('%',#{params.gdzt},'%')
+        </if>
+
+
+        <if test="params.startTime != null and params.startTime != ''">
+            and t.cjsj >= date_format(#{params.startTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            and t.cjsj &lt;= date_format(#{params.endTime},'%Y-%c-%d %H:%i:%s')
+        </if>
+        ORDER BY t.cjsj DESC
+    </select>
+    <!--删除工单信息表-->
+    <update id="deleteInformation">
+        update wom_information set delete_flag='0' where id in
+        <foreach item="ids" collection="array" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+    </update>
+    <!--删除工单过程表-->
+    <update id="deleteProcess" >
+        update wom_process set delete_flag = '0' where gdbh
+        in
+        (select gdbh from wom_information where id in
+        <foreach item="ids" collection="array" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+        )
+    </update>
+    <!--删除工单处理详情表-->
+    <update id="deleteHandleInformation" >
+        update wom_handle_information set delete_flag='0' where gdhjid in
+        (select wp.gdhjid from wom_information wi left join wom_process wp on wi.gdbh = wp.gdbh
+        where wi.id in
+        <foreach item="ids" collection="array" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+        )
+    </update>
+</mapper>

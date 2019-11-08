@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.sa.dao.SaFaultDao">
+
+    <!--故障数量趋势统计-->
+    <select id="quantityTrendOfFault" parameterType="Map" resultType="Map">
+        SELECT
+            to_char(alarm_time, 'MM-dd') AS `date`,
+            SUM(
+                IF(
+                    alarm_record_type='1',
+                    1,
+                    0
+                )
+            ) AS `resourceFault`,
+            SUM(
+                IF(
+                    alarm_record_type='2',
+                    1,
+                    0
+                )
+            ) AS `serviceFault`
+        FROM am_record
+        WHERE alarm_grade='1'
+            <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                AND alarm_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        GROUP BY to_char(alarm_time, 'MM-dd')
+        ORDER BY `date` ASC
+    </select>
+
+    <!--排名前十的故障统计-->
+    <select id="faultOfTopTen" parameterType="Map" resultType="Map">
+        SELECT
+            t1.alarm_object AS `name`,
+            t1.num as `num`
+        FROM (
+            SELECT alarm_object, COUNT(*) AS num
+            FROM am_record
+            WHERE alarm_grade='1'
+                AND alarm_record_type = #{type}
+                <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                    AND alarm_time BETWEEN #{startTime} AND #{endTime}
+                </if>
+            GROUP BY alarm_object
+            ORDER BY num
+            DESC LIMIT 0,10
+        ) t1
+    </select>
+
+    <select id="alarmCount" parameterType="map" resultType="map">
+        select count(*) as `count`,alarm_record_type as `alarm_record_type` from am_record where alarm_grade = '1' GROUP BY alarm_record_type
+    </select>
+
+</mapper>

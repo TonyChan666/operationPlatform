@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.rm.dao.ServerDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.rm.entity.ServerEntity" id="serverMap">
+        <result property="id" column="id"/>
+        <result property="fwqbm" column="fwqbm"/>
+        <result property="sbmc" column="sbmc"/>
+        <result property="sbxlh" column="sbxlh"/>
+        <result property="sbpp" column="sbpp"/>
+        <result property="sbxh" column="sbxh"/>
+        <result property="gys" column="gys"/>
+        <result property="wbs" column="wbs"/>
+        <result property="czxt" column="czxt"/>
+        <result property="ip" column="ip"/>
+        <result property="wllb" column="wllb"/>
+        <result property="ywjz" column="ywjz"/>
+        <result property="ywryid" column="ywryid"/>
+        <result property="bzsm" column="bzsm"/>
+        <result property="zncrl" column="zncrl"/>
+        <result property="zncrldw" column="zncrldw"/>
+        <result property="cpuxh" column="cpuxh"/>
+        <result property="zcpuhs" column="zcpuhs"/>
+        <result property="zyprl" column="zyprl"/>
+        <result property="zyprldw" column="zyprldw"/>
+        <result property="dygl" column="dygl"/>
+        <result property="dydy" column="dydy"/>
+        <result property="wk" column="wk"/>
+        <result property="jfbh" column="jfbh"/>
+        <result property="jfwzbz" column="jfwzbz"/>
+        <result property="jgbh" column="jgbh"/>
+        <result property="qsuw" column="qsuw"/>
+        <result property="zyus" column="zyus"/>
+        <result property="ywz" column="ywz"/>
+        <result property="cjrid" column="cjrid"/>
+        <result property="cjsj" column="cjsj"/>
+        <result property="xgrid" column="xgrid"/>
+        <result property="xgsj" column="xgsj"/>
+        <result property="sfyx" column="sfyx"/>
+    </resultMap>
+
+    <!-- 删除服务器，逻辑删除 -->
+    <update id="removeToRecoveryByIds" parameterType="java.util.List">
+        update rm_server set delete_flag = 0 where id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="getServer" parameterType="Map" resultType="cn.com.bmsoft.modules.rm.entity.ServerEntity">
+        select re.*,us.name as `ywry`,name as `ywrymc`
+        ,(select t.name from c_dictionary_item t where t.dict_code='ywjz' and t.value=re.ywjz) ywjzmc
+        from rm_server re
+        LEFT JOIN sys_user us on re.ywryid = us.user_id
+        where re.delete_flag is null
+        and re.id = #{id}
+        <if test="gys != null and gys != '' and userId != null and userId !=''">
+            and (re.gys = #{gys} or re.id in (select zyid from rm_resource_dept where zybm = 'rm_server' and ywzid in (select dept_id from sys_user_dept where user_id = #{params.userId})) or re.ywryid = #{roleywry})
+        </if>
+        <if test="ownywry != null and ownywry != ''">
+            and ywryid = #{ownywry}
+        </if>
+    </select>
+
+    <select id="getServerList" parameterType="Map" resultType="cn.com.bmsoft.modules.rm.entity.ServerEntity">
+        select re.*,us.name as `ywry`,name as `ywrymc`
+        ,(select t.name from c_dictionary_item t where t.dict_code='wllb' and t.value=re.wllb) `wllbmc`
+        ,(select t.name from c_dictionary_item t where t.dict_code='ywjz' and t.value=re.ywjz) `ywjzmc`
+        ,(select count(DISTINCT zyid) from rm_deployment_info info where zybm = 'rm_storage' and info.fwqid = re.id) `cczy`
+        ,(select count(DISTINCT zyid) from rm_deployment_info info where zybm = 'rm_link' and info.fwqid = re.id)   `ll`
+        ,(select count(DISTINCT zyid) from rm_deployment_info info where zybm = 'rm_component' and info.fwqid = re.id)   `zj`
+        ,(select count(DISTINCT zyid) from rm_deployment_info info where zybm = 'rm_container' and info.fwqid = re.id)  `rq`
+        ,(select count(DISTINCT zyid) from rm_deployment_info info where zybm = 'bsm_service' and info.fwqid = re.id)  `ywfw`
+        from rm_server re JOIN sys_user us on re.ywryid = us.user_id
+        <if test="params.ywry != null and params.ywry != ''">
+            and us.name like concat(concat('%',#{params.ywry}),'%')
+        </if>
+        where delete_flag is null
+        <if test="params.sbmc != null and params.sbmc != ''">
+            and re.sbmc like concat(concat('%',#{params.sbmc}),'%')
+        </if>
+        <if test="params.sbxlh != null and params.sbxlh != ''">
+            and re.sbxlh like concat(concat('%',#{params.sbxlh}),'%')
+        </if>
+        <if test="params.ip != null and params.ip != ''">
+            and re.ip like concat(concat('%',#{params.ip}),'%')
+        </if>
+        <if test="params.sbxh != null and params.sbxh != ''">
+            and re.sbxh like concat(concat('%',#{params.sbxh}),'%')
+        </if>
+        <if test="params.ywjz != null and params.ywjz != ''">
+            and re.ywjz like concat(concat('%',#{params.ywjz}),'%')
+        </if>
+        <!--<if test="params.ywryid != null and params.ywryid != ''">
+            and re.ywryid like concat(concat('%',#{params.ywryid}),'%')
+        </if>-->
+        <if test="params.wllb != null and params.wllb != ''">
+            and re.wllb like concat(concat('%',#{params.wllb}),'%')
+        </if>
+        <if test="params.sfyx != null and params.sfyx != ''">
+            and re.sfyx like concat(concat('%',#{params.sfyx}),'%')
+        </if>
+        <if test="params.gys != null and params.gys != '' and params.userId != null and params.userId !=''">
+            and (re.gys = #{params.gys} or re.ywryid in
+                    (select user_id from sys_user_dept where dept_id in
+                        (select dept_id from sys_user_dept where user_id = #{params.userId})
+                    )
+            or re.ywryid = #{params.roleywry})
+        </if>
+        <if test="params.ownywry != null and params.ownywry != ''">
+            and ywryid = #{params.ownywry}
+        </if>
+        <if test="params.id != null and params.id != ''">
+            and re.id = #{params.id}
+        </if>
+    </select>
+
+</mapper>

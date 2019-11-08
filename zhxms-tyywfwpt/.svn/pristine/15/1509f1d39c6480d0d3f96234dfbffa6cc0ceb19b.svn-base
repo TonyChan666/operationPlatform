@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bmsoft.modules.attachment.dao.AttachmentDao">
+
+    <resultMap type="cn.com.bmsoft.modules.attachment.entity.AttachmentBusinessEntity" id="AttachmentBusinessEntityMap">
+        <result property="id" column="id"/>
+        <result property="businessTableName" column="business_table_name"/>
+        <result property="businessTableId" column="business_table_id"/>
+        <result property="attachmentId" column="attachment_id"/>
+        <result property="attachmentName" column="attachment_name"/>
+    </resultMap>
+
+    <select id="selectAttachmentBusiness" parameterType="cn.com.bmsoft.modules.attachment.entity.AttachmentBusinessEntity" resultMap="AttachmentBusinessEntityMap">
+        SELECT * FROM c_attachment_business
+            WHERE business_table_name = #{businessTableName} AND business_table_id = #{businessTableId}
+    </select>
+
+    <insert id="insertAttachmentBusiness" parameterType="cn.com.bmsoft.modules.attachment.entity.AttachmentBusinessEntity">
+        INSERT INTO c_attachment_business
+            VALUES(#{id}, #{businessTableName}, #{businessTableId}, #{attachmentId}, #{attachmentName})
+    </insert>
+
+</mapper>

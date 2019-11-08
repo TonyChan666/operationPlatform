@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.rm.dao.ContainerDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.rm.entity.ContainerEntity" id="containerMap">
+        <result property="id" column="id"/>
+        <result property="rqbm" column="rqbm"/>
+        <result property="rqmc" column="rqmc"/>
+        <result property="ywjz" column="ywjz"/>
+        <result property="ywryid" column="ywryid"/>
+        <result property="bzsm" column="bzsm"/>
+        <result property="bbh" column="bbh"/>
+        <result property="cjrid" column="cjrid"/>
+        <result property="cjsj" column="cjsj"/>
+        <result property="xgrid" column="xgrid"/>
+        <result property="xgsj" column="xgsj"/>
+        <result property="sfyx" column="sfyx"/>
+        <result property="deleteFlag" column="delete_flag"/>
+    </resultMap>
+
+    <update id="removeToRecoveryByIds" parameterType="java.util.List">
+        update rm_container set delete_flag = 0 where id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="getContainer" parameterType="int" resultType="cn.com.bmsoft.modules.rm.entity.ContainerEntity">
+        select re.*,fwqid,azwz,bbh,us.name as `ywry`,us.name as `ywrymc`,ser.sbmc as `azfwq`
+        ,(select t.name from c_dictionary_item t where t.dict_code='ywjz' and t.value=re.ywjz) `ywjzmc`
+        from rm_container re LEFT JOIN sys_user us on re.ywryid = us.user_id
+        left join rm_deployment_info info on re.id = info.zyid and zybm = 'rm_container'
+        left join rm_server ser on info.fwqid = ser.id
+        where  re.delete_flag is null
+        and re.id = #{id}
+    </select>
+
+    <select id="getContainerList" parameterType="Map" resultType="cn.com.bmsoft.modules.rm.entity.ContainerEntity">
+        select re.*,fwqid,azwz,bbh,us.name as `ywry`,us.name as `ywrymc`,ser.sbmc as `azfwq`
+        ,(select t.name from c_dictionary_item t where t.dict_code='ywjz' and t.value=re.ywjz) `ywjzmc`
+        from rm_container re left join rm_deployment_info info on re.id = info.zyid and zybm = 'rm_container'
+        left join rm_server ser on info.fwqid = ser.id
+        <if test="params.azfwq != null and params.azfwq != ''">
+            and ser.sbmc like concat(concat('%',#{params.azfwq}),'%')
+        </if>
+        JOIN sys_user us on re.ywryid = us.user_id
+        <if test="params.ywry != null and params.ywry != ''">
+            and us.name like concat(concat('%',#{params.ywry}),'%')
+        </if>
+
+        where 1=1 and re.delete_flag is null
+        <if test="params.rqmc != null and params.rqmc != ''">
+            and re.rqmc like concat(concat('%',#{params.rqmc}),'%')
+        </if>
+        <if test="params.ywjz != null and params.ywjz != ''">
+            and re.ywjz like concat(concat('%',#{params.ywjz}),'%')
+        </if>
+        <!--<if test="params.ywryid != null and params.ywryid != ''">
+            and re.ywryid like concat(concat('%',#{params.ywryid}),'%')
+        </if>-->
+        <if test="params.sfyx != null and params.sfyx != ''">
+            and re.sfyx like concat(concat('%',#{params.sfyx}),'%')
+        </if>
+        <if test="params.azwz != null and params.azwz != ''">
+            and info.azwz like concat(concat('%',#{params.azwz}),'%')
+        </if>
+        <if test="params.bbh != null and params.bbh != ''">
+            and info.bbh like concat(concat('%',#{params.bbh}),'%')
+        </if>
+        <if test="params.fwqid != null and params.fwqid != ''">
+            and ser.id = #{params.fwqid}
+        </if>
+    </select>
+
+
+</mapper>

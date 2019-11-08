@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.bmsoft.modules.bm.dao.StrategyDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.com.bmsoft.modules.bm.entity.StrategyEntity" id="strategyMap">
+        <result property="id" column="id"/>
+        <result property="bfbh" column="bfbh"/>
+        <result property="bfmc" column="bfmc"/>
+        <result property="bflj" column="bflj"/>
+        <result property="hfczsm" column="hfczsm"/>
+        <result property="bfsdsj" column="bfsdsj"/>
+        <result property="fwqid" column="fwqid"/>
+        <result property="ywfwid" column="ywfwid"/>
+        <result property="bfycgdclsx" column="bfycgdclsx"/>
+        <result property="tzqd" column="tzqd"/>
+        <result property="ywryid" column="ywryid"/>
+        <result property="cjrid" column="cjrid"/>
+        <result property="cjsj" column="cjsj"/>
+        <result property="xgrid" column="xgrid"/>
+        <result property="xgsj" column="xgsj"/>
+        <result property="sfyx" column="sfyx"/>
+        <result property="status" column="status"/>
+        <result property="fjid" column="fjid"/>
+        <result property="fjmc" column="fjmc"/>
+        <result property="deleteFlag" column="delete_flag"/>
+    </resultMap>
+
+    <update id="updateBatchByIds">
+        update bm_strategy set delete_flag = '0' where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+</mapper>
