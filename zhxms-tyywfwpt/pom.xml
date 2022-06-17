@@ -45,7 +45,7 @@
 		<swagger.version>2.7.0</swagger.version>
 		<xhtmlrenderer.version>R8</xhtmlrenderer.version>
         <itextpdf.version>5.5.12</itextpdf.version>
-		<fastjson.version>1.2.60</fastjson.version>
+		<fastjson.version>1.2.83</fastjson.version>
 		<itext.version>2.1.7</itext.version>
 		<jsch.version>0.1.54</jsch.version>
 		<gauss.version>GaussDB_100_1.0.1.B023</gauss.version>
